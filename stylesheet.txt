@@ -1,0 +1,15 @@
+QListWidget
+{
+    background:rgb(120, 125, 136);
+    alternate-background-color:rgb(72, 78, 86);
+}
+
+QListWidget::item:hover
+{
+    background:rgb(255, 0, 0);
+}
+
+QListWidget::item:selected
+{
+    background:rgb(0, 0, 255);
+}
