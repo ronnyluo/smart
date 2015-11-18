@@ -16,13 +16,15 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     calendaritem.cpp \
     calendar.cpp \
-    priceeditor.cpp
+    priceeditor.cpp \
+    network.cpp
 
 HEADERS  += mainwindow.h \
     define.h \
     calendaritem.h \
     calendar.h \
-    priceeditor.h
+    priceeditor.h \
+    network.h
 
 FORMS    += mainwindow.ui \
     calendaritem.ui \
