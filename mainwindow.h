@@ -5,6 +5,7 @@
 #include "define.h"
 #include <QListWidgetItem>
 #include "priceeditor.h"
+#include <QtNetwork/QNetworkReply>
 
 namespace Ui {
 class MainWindow;
@@ -41,7 +42,8 @@ private slots:
     void serviceItemClicked(QListWidgetItem* listWidgetItem);
     void updateServicePriceInfoSlot(QMap<QString, QMap<QString, TicketPriceInfo> >& mapPriceInfo);
 
-
+    void replyFinishedForTicket(QNetworkReply* pNetworkReply);
+    void replyFinishedForPickService(QNetworkReply* pNetworkReply);
 
 private:
     void addItemToTicketList(TicketInfo& ticketInfo);
@@ -53,7 +55,8 @@ private:
     void addItemToServiceList(PickServiceInfo& serviceInfo);
     void clearServiceUI();
     void updateServiceUI(PickServiceInfo& serviceInfo);
-
+    void sendTicket(const TicketInfo & ticketInfo);
+    void sendPickService(const PickServiceInfo & pickServiceInfo);
 private:
     Ui::MainWindow *ui;
     QVector<TicketInfo> m_vecTicketInfo;

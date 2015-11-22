@@ -45,7 +45,7 @@ class UpdateAirTicketController : public HttpController
 {
     Q_OBJECT
 public slots:
-     virtual void handleResults(const QString & result);
+    virtual void handleResults(const QString & result);
     void updateTicket(const QString & postData);
 };
 
@@ -55,7 +55,7 @@ class UpdatePickServiceController : public HttpController
     Q_OBJECT
 public slots:
      virtual void handleResults(const QString & result);
-    void updatePickService(const QString & postData);
+     void updatePickService(const QString & postData);
 };
 
 

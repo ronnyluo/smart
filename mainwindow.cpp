@@ -5,6 +5,9 @@
 #include <QMessageBox>
 #include <QListWidget>
 #include "priceeditor.h"
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkRequest>
+#include<QTextCodec>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -253,6 +256,7 @@ void MainWindow::on_pushButtonUpdate_clicked()
             addItemToTicketList(tmpTicketInfo);
         }
     }
+    sendTicket(tmpTicketInfo);
 }
 
 void MainWindow::on_pushButtonDelete_clicked()
@@ -596,6 +600,7 @@ void MainWindow::on_pushButton_ServiceUpdate_clicked()
             addItemToServiceList(tmpPickServiceInfo);
         }
     }
+    sendPickService(tmpPickServiceInfo);
 }
 
 void MainWindow::on_pushButton_ServiceDelete_clicked()
@@ -674,4 +679,136 @@ void MainWindow::on_pushButton_ServicePrice_clicked()
         }
     }
     m_pPickServicePriceEditor->show();
+}
+
+void MainWindow::sendTicket(const TicketInfo & ticketInfo)
+{
+    QJsonObject jsonObject;
+    ticketInfo.writeTo(jsonObject);
+    QJsonDocument jsonDocument(jsonObject);
+    QByteArray postData;
+    postData.append("op=update&");
+    postData.append("ticket_num=").append(ticketInfo.strTicketNo);
+    postData.append("&ticket_info=").append(jsonDocument.toJson());
+
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    connect(manager, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(replyFinishedForTicket(QNetworkReply*)));
+
+    QNetworkRequest networkRequest;
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+    networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
+    networkRequest.setUrl(QUrl("http://192.168.1.103:3000/airticket.cgi"));
+    manager->post(networkRequest, postData);
+}
+
+void MainWindow::sendPickService(const PickServiceInfo & pickServiceInfo)
+{
+    QJsonObject jsonObject;
+    pickServiceInfo.writeTo(jsonObject);
+    QJsonDocument jsonDocument(jsonObject);
+    QByteArray postData;
+    postData.append("op=update&");
+    postData.append("service_num=").append(pickServiceInfo.strNo);
+    postData.append("&service_info=").append(jsonDocument.toJson());
+
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    connect(manager, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(replyFinishedForPickService(QNetworkReply*)));
+
+    QNetworkRequest networkRequest;
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+    networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
+    networkRequest.setUrl(QUrl("http://192.168.1.103:3000/pickservice.cgi"));
+    manager->post(networkRequest, postData);
+}
+
+
+void MainWindow::replyFinishedForTicket(QNetworkReply *pNetworkReply)
+{
+    //获取响应的信息，状态码为200表示正常
+    QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    //无错误返回
+    if(pNetworkReply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = pNetworkReply->readAll();  //获取字节
+        QJsonDocument document = QJsonDocument::fromJson(bytes);
+        QJsonObject jsonObject = document.object();
+        QJsonValue jsonValue = jsonObject.value(QString("ret"));
+        if (jsonValue.isUndefined())
+        {
+            QMessageBox::information(NULL, QString("错误"), QString("返回json错误!"));
+        }
+        if (0 == jsonValue.toDouble())
+        {
+             QMessageBox::information(NULL, QString("提示"), QString("更新机票信息成功"));
+        }
+        else
+        {
+            jsonValue = jsonObject.value(QString("msg"));
+            if (jsonValue.isUndefined())
+            {
+                  QMessageBox::information(NULL, QString("错误"), QString("更新机票信息错误!"));
+            }
+            else
+            {
+                 QMessageBox::information(NULL, QString("错误"), QString("更新机票信息错误!").append(jsonValue.toString()));
+            }
+        }
+
+    }
+    else
+    {
+        //处理错误
+        QMessageBox::information(NULL, QString("错误"), status.toString());
+    }
+
+    //收到响应，因此需要处理
+    delete pNetworkReply;
+
+}
+
+void MainWindow::replyFinishedForPickService(QNetworkReply *pNetworkReply)
+{
+    //获取响应的信息，状态码为200表示正常
+    QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    //无错误返回
+    if(pNetworkReply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = pNetworkReply->readAll();  //获取字节
+        QJsonDocument document = QJsonDocument::fromJson(bytes);
+        QJsonObject jsonObject = document.object();
+        QJsonValue jsonValue = jsonObject.value(QString("ret"));
+        if (jsonValue.isUndefined())
+        {
+            QMessageBox::information(NULL, QString("错误"), QString("返回json错误!"));
+        }
+        if (0 == jsonValue.toDouble())
+        {
+             QMessageBox::information(NULL, QString("提示"), QString("更新地接信息成功"));
+        }
+        else
+        {
+            jsonValue = jsonObject.value(QString("msg"));
+            if (jsonValue.isUndefined())
+            {
+                  QMessageBox::information(NULL, QString("错误"), QString("更新地接信息错误!"));
+            }
+            else
+            {
+                 QMessageBox::information(NULL, QString("错误"), QString("更新地接信息错误!").append(jsonValue.toString()));
+            }
+        }
+
+    }
+    else
+    {
+        //处理错误
+        QMessageBox::information(NULL, QString("错误"), status.toString());
+    }
+
+    //收到响应，因此需要处理
+    delete pNetworkReply;
 }

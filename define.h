@@ -4,7 +4,7 @@
 #include <QMap>
 #include <QJsonDocument>
 #include <QJsonObject>
-
+#include <QTextCodec>
 //调试时使用
 const QString QSS_CONFIG_FILE_PATH = "../smart/stylesheet.txt";
 const QString PICTURE_FILE_PATH = "../smart/picture.png";
@@ -22,7 +22,7 @@ typedef struct TicketPriceInfo
     int nTicketAdultPrice;               //成人票价
     int nTicketChildPrice;               //儿童票价
     int nSigleRoomSpread;                //单房差价
-    QJsonObject& writeTo(QJsonObject & jsonObject)
+    QJsonObject& writeTo(QJsonObject & jsonObject)const
     {
         jsonObject.insert(QString("TicketAdultPrice"), QJsonValue(nTicketAdultPrice));
         jsonObject.insert(QString("TicketChildPrice"), QJsonValue(nTicketChildPrice));
@@ -60,7 +60,7 @@ typedef struct TicketInfo
     QString strTicketName;                           //机票代码，名称
     //QVector<TicketPriceInfo> vecTicketPriceInfo;     //该机票的票价信息
     QMap<QString, QMap<QString, TicketPriceInfo> > mapTicketPriceInfo; //该机票的票价信息;第一个key为年月,第二个key为日
-    QJsonObject& writeTo(QJsonObject & jsonObject)
+    QJsonObject& writeTo(QJsonObject & jsonObject)const
     {
         jsonObject.insert(QString("TicketDeparture"), QJsonValue(strTicketDeparture));
         jsonObject.insert(QString("TicketDestination"), QJsonValue(strTicketDestination));
@@ -68,11 +68,11 @@ typedef struct TicketInfo
         jsonObject.insert(QString("TicketNo"), QJsonValue(strTicketNo));
         jsonObject.insert(QString("TicketName"), QJsonValue(strTicketName));
         QJsonObject joMap;
-        for (QMap<QString, QMap<QString, TicketPriceInfo> >::Iterator it = mapTicketPriceInfo.begin();
+        for (QMap<QString, QMap<QString, TicketPriceInfo> >::ConstIterator it = mapTicketPriceInfo.begin();
              it != mapTicketPriceInfo.end(); ++it)
         {
             QJsonObject joOuter;
-            for (QMap<QString, TicketPriceInfo>::Iterator itInner = it.value().begin();
+            for (QMap<QString, TicketPriceInfo>::ConstIterator itInner = it.value().begin();
                  itInner != it.value().end(); ++itInner)
             {
                 QJsonObject joInner;
@@ -141,7 +141,7 @@ typedef struct PickServiceInfo
     QString strMissionNo;                      //地接服务团号
     QString strTicketNo;                       //地接服务关联的机票产品编号
     QMap<QString, QMap<QString, TicketPriceInfo> > mapTicketPriceInfo; //该机票的票价信息;第一个key为年月,第二个key为日
-    QJsonObject& writeTo(QJsonObject & jsonObject)
+    QJsonObject& writeTo(QJsonObject & jsonObject)const
     {
         jsonObject.insert(QString("Departure"), QJsonValue(strDeparture));
         jsonObject.insert(QString("Destination"), QJsonValue(strDestination));
@@ -151,11 +151,11 @@ typedef struct PickServiceInfo
         jsonObject.insert(QString("MissionNo"), QJsonValue(strMissionNo));
         jsonObject.insert(QString("TicketNo"), QJsonValue(strTicketNo));
         QJsonObject joMap;
-        for (QMap<QString, QMap<QString, TicketPriceInfo> >::Iterator it = mapTicketPriceInfo.begin();
+        for (QMap<QString, QMap<QString, TicketPriceInfo> >::ConstIterator it = mapTicketPriceInfo.begin();
              it != mapTicketPriceInfo.end(); ++it)
         {
             QJsonObject joOuter;
-            for (QMap<QString, TicketPriceInfo>::Iterator itInner = it.value().begin();
+            for (QMap<QString, TicketPriceInfo>::ConstIterator itInner = it.value().begin();
                  itInner != it.value().end(); ++itInner)
             {
                 QJsonObject joInner;
