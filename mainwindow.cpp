@@ -8,11 +8,15 @@
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
 #include<QTextCodec>
+#include <QJsonArray>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    loadTicket();
+    loadPickServce();
+
     ui->setupUi(this);
 
     resize(QSize(900, 600));
@@ -802,6 +806,101 @@ void MainWindow::replyFinishedForPickService(QNetworkReply *pNetworkReply)
             }
         }
 
+    }
+    else
+    {
+        //处理错误
+        QMessageBox::information(NULL, QString("错误"), status.toString());
+    }
+
+    //收到响应，因此需要处理
+    delete pNetworkReply;
+}
+
+void MainWindow::loadTicket()
+{
+    QByteArray postData;
+    postData.append("op=load&");
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    connect(manager, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(replyFinishedForLoadTicket(QNetworkReply*)));
+
+    QNetworkRequest networkRequest;
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+    networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
+    networkRequest.setUrl(QUrl("http://192.168.1.103:3000/airticket.cgi"));
+    manager->post(networkRequest, postData);
+
+}
+
+void MainWindow::loadPickServce()
+{
+    QByteArray postData;
+    postData.append("op=load&");
+    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
+    connect(manager, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(replyFinishedForLoadPickService(QNetworkReply*)));
+
+    QNetworkRequest networkRequest;
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+    networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
+    networkRequest.setUrl(QUrl("http://192.168.1.103:3000/pickservice.cgi"));
+    manager->post(networkRequest, postData);
+}
+
+void MainWindow::replyFinishedForLoadTicket(QNetworkReply* pNetworkReply)
+{
+    //获取响应的信息，状态码为200表示正常
+    QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    //无错误返回
+    if(pNetworkReply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = pNetworkReply->readAll();  //获取字节
+        QJsonDocument document = QJsonDocument::fromJson(bytes);
+        QJsonArray jsonArray = document.array();
+        for (QJsonArray::iterator it = jsonArray.begin(); it != jsonArray.end(); ++it)
+        {
+            QString sTicket = (*it).toObject()["ticket_info"].toString();
+            QJsonParseError jsonParseErr;
+            QJsonDocument docTicket = QJsonDocument::fromJson(sTicket.toUtf8(), &jsonParseErr);
+            QJsonObject jsonObject = docTicket.object();
+            TicketInfo ticketInfo;
+            ticketInfo.readFrom(jsonObject);
+            m_vecTicketInfo.push_back(ticketInfo);
+        }
+    }
+    else
+    {
+        //处理错误
+        QMessageBox::information(NULL, QString("错误"), status.toString());
+    }
+
+    //收到响应，因此需要处理
+    delete pNetworkReply;
+}
+
+void MainWindow::replyFinishedForLoadPickService(QNetworkReply* pNetworkReply)
+{
+    //获取响应的信息，状态码为200表示正常
+    QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    //无错误返回
+    if(pNetworkReply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = pNetworkReply->readAll();  //获取字节
+        QJsonDocument document = QJsonDocument::fromJson(bytes);
+        QJsonArray jsonArray = document.array();
+        for (QJsonArray::iterator it = jsonArray.begin(); it != jsonArray.end(); ++it)
+        {
+            QString sService = (*it).toObject()["service_info"].toString();
+            QJsonParseError jsonParseErr;
+            QJsonDocument docService = QJsonDocument::fromJson(sService.toUtf8(), &jsonParseErr);
+            QJsonObject jsonObject = docService.object();
+            PickServiceInfo pickServiceInfo;
+            pickServiceInfo.readFrom(jsonObject);
+            m_vecPickServiceInfo.push_back(pickServiceInfo);
+        }
     }
     else
     {

@@ -108,7 +108,7 @@ typedef struct TicketInfo
         jsonValue = jsonObject.value(QString("TicketName"));
         if (!jsonValue.isUndefined())
         {
-            strTicketNo = jsonValue.toString();
+            strTicketName = jsonValue.toString();
         }
         jsonValue = jsonObject.value(QString("TicketPriceInfo"));
         if (jsonValue.isUndefined())

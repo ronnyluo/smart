@@ -45,6 +45,9 @@ private slots:
     void replyFinishedForTicket(QNetworkReply* pNetworkReply);
     void replyFinishedForPickService(QNetworkReply* pNetworkReply);
 
+    void replyFinishedForLoadTicket(QNetworkReply* pNetworkReply);
+    void replyFinishedForLoadPickService(QNetworkReply* pNetworkReply);
+
 private:
     void addItemToTicketList(TicketInfo& ticketInfo);
     bool hasSameTicketNo(QString ticketNo);
@@ -57,6 +60,8 @@ private:
     void updateServiceUI(PickServiceInfo& serviceInfo);
     void sendTicket(const TicketInfo & ticketInfo);
     void sendPickService(const PickServiceInfo & pickServiceInfo);
+    void loadTicket();
+    void loadPickServce();
 private:
     Ui::MainWindow *ui;
     QVector<TicketInfo> m_vecTicketInfo;
