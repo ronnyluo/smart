@@ -702,7 +702,7 @@ void MainWindow::sendTicket(const TicketInfo & ticketInfo)
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
-    networkRequest.setUrl(QUrl("http://192.168.1.103:3000/airticket.cgi"));
+    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/airticket.cgi"));
     manager->post(networkRequest, postData);
 }
 
@@ -723,7 +723,7 @@ void MainWindow::sendPickService(const PickServiceInfo & pickServiceInfo)
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
-    networkRequest.setUrl(QUrl("http://192.168.1.103:3000/pickservice.cgi"));
+    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/pickservice.cgi"));
     manager->post(networkRequest, postData);
 }
 
@@ -828,7 +828,7 @@ void MainWindow::loadTicket()
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
-    networkRequest.setUrl(QUrl("http://192.168.1.103:3000/airticket.cgi"));
+    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/airticket.cgi"));
     manager->post(networkRequest, postData);
 
 }
@@ -844,7 +844,7 @@ void MainWindow::loadPickServce()
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
-    networkRequest.setUrl(QUrl("http://192.168.1.103:3000/pickservice.cgi"));
+    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/pickservice.cgi"));
     manager->post(networkRequest, postData);
 }
 
