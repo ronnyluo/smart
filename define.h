@@ -5,6 +5,8 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTextCodec>
+#include <QtGlobal>
+
 //调试时使用
 const QString QSS_CONFIG_FILE_PATH = "../smart/stylesheet.txt";
 const QString PICTURE_FILE_PATH = "../smart/picture.png";
@@ -222,4 +224,26 @@ typedef struct PickServiceInfo
     }
 }PickServiceInfoStruct;
 
+QString getRandomDigit(int iNum);
+QString getMidStr(QString & origin, const QString & first, const QString & last);
+QString getLeftStr(QString & origin, const QString & start);
+QString getRightStr(QString & origin, const QString & start);
+
+const QString cs2 = "window={ \n\
+                  navigator:{plugins:[0],userAgent:\"Mozilla/5.0 (Windows NT 6.1; Trident/7.0; SLCC2; .NET CLR 2.0.50727; .NET CLR  3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E; rv:11.0) like Gecko\"}, \n\
+                  screen:{availHeight:\"222\",availWidth:\"1024\",height:\"652\",width:\"1024\",colorDepth:\"24\"}, \n\
+                  document:{cookie:\"\"} \n\
+                   };";
+
+const QString cs3 = "function test(aa1, bb1) {  \n\
+                    7777777 \n\
+                    6666666 \n\
+                    cc = 88888888(aaa+'1442394301406:'+bbb+':hntub3:t20zrv:Mozilla50WindowsNT61Trident70SLCC2NETCLR2[5W1]NETCLR3[6W2]NETCLR3[6W3]MediaCenterPC60NET40CNET40Erv110likeGecko:nw140p0140o:1442397677436:14'); \n\
+                    return cc; \n\
+                    }";
+
+const QString cs6 = "function test(aa1, bb1) { \n\
+        cc = 88888888; \n\
+        return cc; \n\
+        }";
 #endif // DEFINE_H

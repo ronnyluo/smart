@@ -6,6 +6,9 @@
 #include <QListWidgetItem>
 #include "priceeditor.h"
 #include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QNetworkAccessManager>
+#include "captchadialog.h"
+#include "network.h"
 
 namespace Ui {
 class MainWindow;
@@ -42,11 +45,12 @@ private slots:
     void serviceItemClicked(QListWidgetItem* listWidgetItem);
     void updateServicePriceInfoSlot(QMap<QString, QMap<QString, TicketPriceInfo> >& mapPriceInfo);
 
-    void replyFinishedForTicket(QNetworkReply* pNetworkReply);
-    void replyFinishedForPickService(QNetworkReply* pNetworkReply);
+    void replyFinishedForTicket();
+    void replyFinishedForPickService();
 
-    void replyFinishedForLoadTicket(QNetworkReply* pNetworkReply);
-    void replyFinishedForLoadPickService(QNetworkReply* pNetworkReply);
+    void replyFinishedForLoadTicket();
+    void replyFinishedForLoadPickService();
+
 
 private:
     void addItemToTicketList(TicketInfo& ticketInfo);
@@ -62,6 +66,8 @@ private:
     void sendPickService(const PickServiceInfo & pickServiceInfo);
     void loadTicket();
     void loadPickServce();
+    void getAnswer(QString& jsFunc, QString& answer, QString& cookie);
+
 private:
     Ui::MainWindow *ui;
     QVector<TicketInfo> m_vecTicketInfo;
@@ -70,6 +76,8 @@ private:
     QVector<PickServiceInfo> m_vecPickServiceInfo;
     QVector<PickServiceInfo> m_vecUpdatePickServiceInfo;    //需要向后台更新的地接服务信息
     PriceEditor *m_pPickServicePriceEditor;
+    QNetworkAccessManager *m_pAssitNetworkManager;
+    QVector<QunerHttp*> m_vecQunerHttPtr;
 };
 
 #endif // MAINWINDOW_H

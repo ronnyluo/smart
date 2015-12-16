@@ -3,7 +3,11 @@
 
 #include <QObject>
 #include <QThread>
+#include <QNetworkAccessManager>
+#include "captchadialog.h"
+#include "mainwindow.h"
 
+/*
 class HttpWorker : public QObject
 {
     Q_OBJECT
@@ -57,6 +61,44 @@ public slots:
      virtual void handleResults(const QString & result);
      void updatePickService(const QString & postData);
 };
+*/
 
+class QunerHttp : public QObject
+{
+    Q_OBJECT
+public:
+    QunerHttp(const QString & sUserName, const QString & sPassword, MainWindow * parent);
+    void setUserName(const QString & sUserName);
+    void setPassword(const QString & sPassword);
+
+private slots:
+    void replyLogin();
+    void replyReqSecApi();
+    void sslErrors(const QList<QSslError> &errors);
+    void replyReqQunerHome();
+    void replyNeedCaptcha();
+    void replyGetVcode();
+    void getVcode(const QString & code);
+
+private:
+    void reqQunerHome();
+    void loginQuner(const QString & answer, const QString & cookie, const QString & code);
+    void reqSecApi();
+    void getAnswer(QString& jsFunc, QString& answer, QString& cookie);
+    void getAnswerV1(QString& jsFunc, QString& answer);
+    void getCookie(QString & jsCode, QString & cookie);
+    void reqVcode();
+
+private:
+    bool m_bNeedCaptcha;
+    QString m_sAnswer;
+    QString m_sCookie;
+    QString m_sCode;
+    CaptchaDialog * m_pCaptchaDialog;
+    QString m_sUserName;
+    QString m_sPassword;
+    QNetworkAccessManager *m_pNetworkManager;
+    MainWindow * m_pMainWindow;
+};
 
 #endif // NETWORK_H

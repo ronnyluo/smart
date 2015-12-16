@@ -5,18 +5,19 @@
 #include <QMessageBox>
 #include <QListWidget>
 #include "priceeditor.h"
-#include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkRequest>
-#include<QTextCodec>
+#include <QTextCodec>
 #include <QJsonArray>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+
+    m_pAssitNetworkManager = new QNetworkAccessManager(this);
+
     loadTicket();
     loadPickServce();
-
     ui->setupUi(this);
 
     resize(QSize(900, 600));
@@ -63,6 +64,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QImage *image=new QImage(PICTURE_FILE_PATH);
     ui->label_Picture->setPixmap(QPixmap::fromImage(*image));
 
+
+    //reqQunerHome();
 }
 
 MainWindow::~MainWindow()
@@ -695,15 +698,13 @@ void MainWindow::sendTicket(const TicketInfo & ticketInfo)
     postData.append("ticket_num=").append(ticketInfo.strTicketNo);
     postData.append("&ticket_info=").append(jsonDocument.toJson());
 
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    connect(manager, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(replyFinishedForTicket(QNetworkReply*)));
-
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
     networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/airticket.cgi"));
-    manager->post(networkRequest, postData);
+
+    QNetworkReply* pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyFinishedForTicket()));
 }
 
 void MainWindow::sendPickService(const PickServiceInfo & pickServiceInfo)
@@ -716,20 +717,22 @@ void MainWindow::sendPickService(const PickServiceInfo & pickServiceInfo)
     postData.append("service_num=").append(pickServiceInfo.strNo);
     postData.append("&service_info=").append(jsonDocument.toJson());
 
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    connect(manager, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(replyFinishedForPickService(QNetworkReply*)));
-
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
     networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/pickservice.cgi"));
-    manager->post(networkRequest, postData);
+    QNetworkReply* pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
+
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyFinishedForPickService()));
+
+
 }
 
 
-void MainWindow::replyFinishedForTicket(QNetworkReply *pNetworkReply)
+void MainWindow::replyFinishedForTicket()
 {
+    QNetworkReply *pNetworkReply = qobject_cast<QNetworkReply*>(sender());
+
     //获取响应的信息，状态码为200表示正常
     QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
 
@@ -768,13 +771,12 @@ void MainWindow::replyFinishedForTicket(QNetworkReply *pNetworkReply)
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
 
-    //收到响应，因此需要处理
-    delete pNetworkReply;
-
 }
 
-void MainWindow::replyFinishedForPickService(QNetworkReply *pNetworkReply)
+void MainWindow::replyFinishedForPickService()
 {
+    QNetworkReply *pNetworkReply = qobject_cast<QNetworkReply*>(sender());
+
     //获取响应的信息，状态码为200表示正常
     QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
 
@@ -812,44 +814,42 @@ void MainWindow::replyFinishedForPickService(QNetworkReply *pNetworkReply)
         //处理错误
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
-
-    //收到响应，因此需要处理
-    delete pNetworkReply;
 }
 
 void MainWindow::loadTicket()
 {
     QByteArray postData;
     postData.append("op=load&");
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    connect(manager, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(replyFinishedForLoadTicket(QNetworkReply*)));
 
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
     networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/airticket.cgi"));
-    manager->post(networkRequest, postData);
 
+    QNetworkReply *pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
+    connect(pNetworkReply, SIGNAL(finished()),
+            this, SLOT(replyFinishedForLoadTicket()));
 }
 
 void MainWindow::loadPickServce()
 {
     QByteArray postData;
     postData.append("op=load&");
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    connect(manager, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(replyFinishedForLoadPickService(QNetworkReply*)));
 
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
     networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/pickservice.cgi"));
-    manager->post(networkRequest, postData);
+    QNetworkReply *pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
+
+    connect(pNetworkReply, SIGNAL(finished()),
+            this, SLOT(replyFinishedForLoadPickService()));
 }
 
-void MainWindow::replyFinishedForLoadTicket(QNetworkReply* pNetworkReply)
+void MainWindow::replyFinishedForLoadTicket()
 {
+    QNetworkReply* pNetworkReply = qobject_cast<QNetworkReply*>(sender());
+
     //获取响应的信息，状态码为200表示正常
     QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
 
@@ -875,13 +875,13 @@ void MainWindow::replyFinishedForLoadTicket(QNetworkReply* pNetworkReply)
         //处理错误
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
-
-    //收到响应，因此需要处理
-    delete pNetworkReply;
+    // pNetworkReply->deleteLater();
 }
 
-void MainWindow::replyFinishedForLoadPickService(QNetworkReply* pNetworkReply)
+void MainWindow::replyFinishedForLoadPickService()
 {
+    QNetworkReply* pNetworkReply = qobject_cast<QNetworkReply*>(sender());
+
     //获取响应的信息，状态码为200表示正常
     QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
 
@@ -907,7 +907,5 @@ void MainWindow::replyFinishedForLoadPickService(QNetworkReply* pNetworkReply)
         //处理错误
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
-
-    //收到响应，因此需要处理
-    delete pNetworkReply;
+    // pNetworkReply->deleteLater();
 }

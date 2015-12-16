@@ -6,6 +6,8 @@
 #include <QDir>
 #include <QDebug>
 #include <QSize>
+#include <QtGlobal>
+#include <QDateTime>
 
 
 /**
@@ -36,5 +38,7 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
+    QDateTime dateTime;
+    qsrand(dateTime.toTime_t());
     return a.exec();
 }

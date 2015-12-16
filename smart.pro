@@ -7,7 +7,7 @@
 QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-QT += network
+QT += network  qml
 
 TARGET = tool
 TEMPLATE = app
@@ -18,16 +18,20 @@ SOURCES += main.cpp\
     calendaritem.cpp \
     calendar.cpp \
     priceeditor.cpp \
-    network.cpp
+    network.cpp \
+    captchadialog.cpp \
+    define.cpp
 
 HEADERS  += mainwindow.h \
     define.h \
     calendaritem.h \
     calendar.h \
     priceeditor.h \
-    network.h
+    network.h \
+    captchadialog.h
 
 FORMS    += mainwindow.ui \
     calendaritem.ui \
     calendar.ui \
-    priceeditor.ui
+    priceeditor.ui \
+    captchadialog.ui
