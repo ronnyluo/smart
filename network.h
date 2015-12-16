@@ -63,6 +63,7 @@ public slots:
      void updatePickService(const QString & postData);
 };
 */
+class MainWindow;
 
 class QunerHttp : public QObject
 {
