@@ -8,6 +8,7 @@
 #include <QNetworkCookie>
 #include <QFile>
 #include <QMessageBox>
+#include "mainwindow.h"
 
 /*
 void HttpWorker::doWork(const QString & url, const QString & postData)

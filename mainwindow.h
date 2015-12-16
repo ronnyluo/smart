@@ -6,6 +6,7 @@
 #include <QListWidgetItem>
 #include "priceeditor.h"
 #include <QtNetwork/QNetworkReply>
+#include <QTableWidgetItem>
 #include <QtNetwork/QNetworkAccessManager>
 #include "captchadialog.h"
 #include "network.h"
@@ -52,6 +53,18 @@ private slots:
     void replyFinishedForLoadPickService();
 
 
+    void on_pushButton_ChannelUpdate_clicked();
+    void on_pushButton_ChannelDel_clicked();
+    void on_pushButton_ChannelCancel_clicked();
+    void channelCurrentItemClicked(QTableWidgetItem *tableWidgetItem);
+
+    void tabWidgetCurrentChanged(int index);
+    void channelListCurrentItemChanged(QListWidgetItem *currentItem, QListWidgetItem *);
+
+    void on_pushButton_ChannelRelationUpdate_clicked();
+    void on_pushButton_ChannelRelationDel_clicked();
+    void on_pushButton_ChannelRelationCancel_clicked();
+
 private:
     void addItemToTicketList(TicketInfo& ticketInfo);
     bool hasSameTicketNo(QString ticketNo);
@@ -66,6 +79,18 @@ private:
     void sendPickService(const PickServiceInfo & pickServiceInfo);
     void loadTicket();
     void loadPickServce();
+
+    //渠道管理
+    void updateChannelList();
+
+    //渠道关联
+    void updateChannelRelationUI();
+    void updateChannelRelationDetailUI(QString strChannelName);
+
+    void clearChannelRelationDetailUI();
+
+
+    void initUI();
     void getAnswer(QString& jsFunc, QString& answer, QString& cookie);
 
 private:
@@ -76,6 +101,9 @@ private:
     QVector<PickServiceInfo> m_vecPickServiceInfo;
     QVector<PickServiceInfo> m_vecUpdatePickServiceInfo;    //需要向后台更新的地接服务信息
     PriceEditor *m_pPickServicePriceEditor;
+
+    QVector<ChannelInfo> m_vecChannelInfo;                  //渠道信息
+    QMap<QString, QVector<ChannelRelationInfo> > m_mapChannelRelationInfo;  //渠道关联信息，key为渠道名称
     QNetworkAccessManager *m_pAssitNetworkManager;
     QVector<QunerHttp*> m_vecQunerHttPtr;
 };

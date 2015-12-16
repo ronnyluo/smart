@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lineEdit_No->setReadOnly(true);
     ui->lineEdit_Name->setReadOnly(true);
 
+    connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabWidgetCurrentChanged(int)));
+
     //connect(ui->listWidget_Ticket, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(ticketItemClicked(QListWidgetItem*)));
     connect(ui->listWidget_Ticket, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), this, SLOT(ticketCurrentItemChanged(QListWidgetItem *, QListWidgetItem *)));
     connect(ui->listWidget_Ticket, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(ticketItemClicked(QListWidgetItem*)));
@@ -60,11 +62,21 @@ MainWindow::MainWindow(QWidget *parent) :
     m_pPickServicePriceEditor->hide();
     connect(m_pPickServicePriceEditor->getCalendar(), SIGNAL(updatePriceInfoSignal(QMap<QString, QMap<QString, TicketPriceInfo> >&)), this, SLOT(updateServicePriceInfoSlot(QMap<QString, QMap<QString, TicketPriceInfo> >&)));
 
+    //渠道模块
+    connect(ui->tableWidget_Channel, SIGNAL(itemClicked(QTableWidgetItem *)), this, SLOT(channelCurrentItemClicked(QTableWidgetItem *)));
+
+    connect(ui->listWidget_ChannelList, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), this, SLOT(channelListCurrentItemChanged(QListWidgetItem *, QListWidgetItem *)));
+
+    //渠道暂时不需要搜索功能
+    ui->label_ChannelFind->hide();
+    ui->lineEdit_ChannelFind->hide();
+
     //显示首页图片
     QImage *image=new QImage(PICTURE_FILE_PATH);
     ui->label_Picture->setPixmap(QPixmap::fromImage(*image));
 
 
+    initUI();
     //reqQunerHome();
 }
 
@@ -81,6 +93,30 @@ MainWindow::~MainWindow()
     }
 }
 
+void MainWindow::initUI()
+{
+    updateChannelList();
+}
+
+void MainWindow::tabWidgetCurrentChanged(int index)
+{
+    switch (index) {
+    case 0:
+        break;
+    case 1:
+        break;
+    case 2:
+        break;
+    case 3:
+        updateChannelList();
+        break;
+    case 4:
+        updateChannelRelationUI();
+        break;
+    default:
+        break;
+    }
+}
 
 void MainWindow::ticketInfoChanged()
 {
@@ -428,6 +464,7 @@ void MainWindow::addItemToServiceList(PickServiceInfo& serviceInfo)
     if(NULL == item)
     {
         qDebug() << "item pointer is NULL";
+        return;
     }
 
     item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
@@ -908,4 +945,295 @@ void MainWindow::replyFinishedForLoadPickService()
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
     // pNetworkReply->deleteLater();
+}
+
+void MainWindow::updateChannelList()
+{
+    qDebug() << "updateChannelList";
+    int row = ui->tableWidget_Channel->rowCount();
+    for(int i=0; i<row; i++)
+    {
+        ui->tableWidget_Channel->removeRow(0);
+    }
+
+    ui->tableWidget_Channel->setColumnCount(3);
+    ui->tableWidget_Channel->setRowCount(m_vecChannelInfo.size());
+    ui->tableWidget_Channel->verticalHeader()->setVisible(false);
+    //ui->tableWidget_Channel->horizontalHeader()->setVisible(false);
+    QStringList header;
+    header << "渠道名称" << "账号" << "密码";
+    ui->tableWidget_Channel->setHorizontalHeaderLabels(header);
+    ui->tableWidget_Channel->horizontalHeader()->resizeSections(QHeaderView::Stretch);
+    for(int i=0; i<m_vecChannelInfo.size(); i++)
+    {
+        QTableWidgetItem *itemName = new QTableWidgetItem(m_vecChannelInfo[i].strChannelName);
+        itemName->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_Channel->setItem(i, 0, itemName);
+
+        QTableWidgetItem *itemAccout = new QTableWidgetItem(m_vecChannelInfo[i].strAccount);
+        itemAccout->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_Channel->setItem(i, 1, itemAccout);
+
+        QTableWidgetItem *itemPassword = new QTableWidgetItem(m_vecChannelInfo[i].strPassword);
+        itemPassword->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_Channel->setItem(i, 2, itemPassword);
+    }
+}
+
+void MainWindow::on_pushButton_ChannelUpdate_clicked()
+{
+    qDebug() << "on_pushButton_ChannelUpdate_clicked";
+    ChannelInfo tmpChannelInfo;
+    tmpChannelInfo.strChannelName = ui->lineEdit_ChannelName->text();
+    tmpChannelInfo.strAccount = ui->lineEdit_Account->text();
+    tmpChannelInfo.strPassword = ui->lineEdit_Password->text();
+
+    int i=0;
+    for(; i<m_vecChannelInfo.size(); i++)
+    {
+        if(tmpChannelInfo.strChannelName == m_vecChannelInfo[i].strChannelName)
+        {
+            QString strText = "是否修改" + tmpChannelInfo.strChannelName + "渠道信息？";
+            QMessageBox::StandardButton reply = QMessageBox::question(this, "提醒", strText, QMessageBox::Yes | QMessageBox::No);
+            if(QMessageBox::Yes == reply)
+            {
+                 m_vecChannelInfo[i] = tmpChannelInfo;
+            }
+            break;
+        }
+    }
+
+    if(i == m_vecChannelInfo.size())
+    {
+        QString strText = "是否添加" + tmpChannelInfo.strChannelName + "渠道信息？";
+        QMessageBox::StandardButton reply = QMessageBox::question(this, "提醒", strText, QMessageBox::Yes | QMessageBox::No);
+        if(QMessageBox::Yes == reply)
+        {
+            m_vecChannelInfo.push_back(tmpChannelInfo);
+        }
+    }
+
+    updateChannelList();
+}
+
+void MainWindow::on_pushButton_ChannelDel_clicked()
+{
+    QString strText = "是否删除" + ui->lineEdit_ChannelName->text() + "渠道信息？";
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "提醒", strText, QMessageBox::Yes | QMessageBox::No);
+    if(QMessageBox::Yes == reply)
+    {
+        for(QVector<ChannelInfo>::iterator iter = m_vecChannelInfo.begin(); iter != m_vecChannelInfo.end(); iter++ )
+        {
+            if(ui->lineEdit_ChannelName->text() == iter->strChannelName)
+            {
+                m_vecChannelInfo.erase(iter);
+                break;
+            }
+        }
+    }
+
+    updateChannelList();
+    ui->lineEdit_ChannelName->setText("");
+    ui->lineEdit_Account->setText("");
+    ui->lineEdit_Password->setText("");
+}
+
+void MainWindow::on_pushButton_ChannelCancel_clicked()
+{
+    ui->lineEdit_ChannelName->setText("");
+    ui->lineEdit_Account->setText("");
+    ui->lineEdit_Password->setText("");
+}
+
+void MainWindow::channelCurrentItemClicked(QTableWidgetItem *tableWidgetItem)
+{
+    int currentRow = ui->tableWidget_Channel->row(tableWidgetItem);
+    if(currentRow < m_vecChannelInfo.size())
+    {
+        ui->lineEdit_ChannelName->setText(m_vecChannelInfo[currentRow].strChannelName);
+        ui->lineEdit_Account->setText(m_vecChannelInfo[currentRow].strAccount);
+        ui->lineEdit_Password->setText(m_vecChannelInfo[currentRow].strPassword);
+    }
+}
+
+void MainWindow::updateChannelRelationUI()
+{
+    disconnect(ui->listWidget_ChannelList, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), 0, 0);
+    ui->listWidget_ChannelList->clear();
+    int count = ui->listWidget_ChannelList->count();
+    for(int i=0; i<count; i++)
+    {
+        QListWidgetItem *deleteItem = ui->listWidget_Ticket->takeItem(0);
+        if(NULL != deleteItem)
+        {
+            delete deleteItem;
+            deleteItem = NULL;
+        }
+    }
+
+    for(int i=0; i<m_vecChannelInfo.size(); i++)
+    {
+        QListWidgetItem *item = new QListWidgetItem(m_vecChannelInfo[i].strChannelName);
+        if(NULL == item)
+        {
+            qDebug() << "item pointer is NULL";
+            break;
+        }
+
+        item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+        ui->listWidget_ChannelList->addItem(item);
+        ui->listWidget_ChannelList->setCurrentItem(item);
+    }
+    connect(ui->listWidget_ChannelList, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), this, SLOT(channelListCurrentItemChanged(QListWidgetItem *, QListWidgetItem *)));
+}
+
+void MainWindow::updateChannelRelationDetailUI(QString strChannelName)
+{
+    QVector<ChannelRelationInfo> vecChannelRealationInfo = m_mapChannelRelationInfo[strChannelName];
+
+    int row = ui->tableWidget_ChannelRelation->rowCount();
+    for(int i=0; i<row; i++)
+    {
+        ui->tableWidget_ChannelRelation->removeRow(0);
+    }
+
+    ui->tableWidget_ChannelRelation->setColumnCount(3);
+    ui->tableWidget_ChannelRelation->setRowCount(vecChannelRealationInfo.size());
+    ui->tableWidget_Channel->verticalHeader()->setVisible(false);
+    //ui->tableWidget_Channel->horizontalHeader()->setVisible(false);
+    QStringList header;
+    header << "地接产品ID" << "关联店铺产品ID" << "关联店铺产品名称";
+    ui->tableWidget_ChannelRelation->setHorizontalHeaderLabels(header);
+    ui->tableWidget_ChannelRelation->horizontalHeader()->resizeSections(QHeaderView::Stretch);
+    for(int i=0; i<vecChannelRealationInfo.size(); i++)
+    {
+        QTableWidgetItem *itemPickServiceID = new QTableWidgetItem(vecChannelRealationInfo[i].strPickServiceId);
+        itemPickServiceID->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ChannelRelation->setItem(i, 0, itemPickServiceID);
+
+        QTableWidgetItem *itemShopProductId = new QTableWidgetItem(vecChannelRealationInfo[i].strShopProductId);
+        itemShopProductId->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ChannelRelation->setItem(i, 1, itemShopProductId);
+
+        QTableWidgetItem *itemShopProductName = new QTableWidgetItem(vecChannelRealationInfo[i].strShopProductName);
+        itemShopProductName->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ChannelRelation->setItem(i, 2, itemShopProductName);
+    }
+}
+
+void MainWindow::channelListCurrentItemChanged(QListWidgetItem *currentItem, QListWidgetItem *)
+{
+    QString strChannelName = currentItem->text();
+    updateChannelRelationDetailUI(strChannelName);
+    clearChannelRelationDetailUI();
+}
+
+void MainWindow::on_pushButton_ChannelRelationUpdate_clicked()
+{
+    QString strChannelName = "";
+    if(ui->listWidget_ChannelList->currentItem())
+    {
+        strChannelName = ui->listWidget_ChannelList->currentItem()->text();
+    }
+    if(strChannelName == "")
+    {
+        QMessageBox::information(NULL, QString("提醒"), QString("请关联一个渠道!"));
+        return;
+    }
+
+    QVector<ChannelRelationInfo>& vecChannelRealationInfo = m_mapChannelRelationInfo[strChannelName];
+
+    ChannelRelationInfo tmpChannelRelationInfo;
+    tmpChannelRelationInfo.strPickServiceId = ui->lineEdit_ChannelPickServiceID->text();
+    tmpChannelRelationInfo.strShopProductId = ui->lineEdit_ShopProductID->text();
+    tmpChannelRelationInfo.strShopProductName = ui->lineEdit_ShopProductName->text();
+    if("" == tmpChannelRelationInfo.strPickServiceId)
+    {
+        QMessageBox::information(NULL, QString("提醒"), QString("请输入地接服务ID!"));
+        return;
+    }
+
+    if("" == tmpChannelRelationInfo.strShopProductId)
+    {
+        QMessageBox::information(NULL, QString("提醒"), QString("请输入关联店铺产品ID!"));
+        return;
+    }
+
+    int i=0;
+    for(; i<vecChannelRealationInfo.size(); i++)
+    {
+        if(tmpChannelRelationInfo.strShopProductId == vecChannelRealationInfo[i].strShopProductId)
+        {
+            QString strText = "是否修改" + tmpChannelRelationInfo.strShopProductId + "关联信息？";
+            QMessageBox::StandardButton reply = QMessageBox::question(this, "提醒", strText, QMessageBox::Yes | QMessageBox::No);
+            if(QMessageBox::Yes == reply)
+            {
+                 vecChannelRealationInfo[i] = tmpChannelRelationInfo;
+            }
+            break;
+        }
+    }
+
+    if(i == vecChannelRealationInfo.size())
+    {
+        QString strText = "是否添加" + tmpChannelRelationInfo.strShopProductId + "关联信息？";
+        QMessageBox::StandardButton reply = QMessageBox::question(this, "提醒", strText, QMessageBox::Yes | QMessageBox::No);
+        if(QMessageBox::Yes == reply)
+        {
+            vecChannelRealationInfo.push_back(tmpChannelRelationInfo);
+        }
+    }
+
+    updateChannelRelationDetailUI(strChannelName);
+}
+
+void MainWindow::on_pushButton_ChannelRelationDel_clicked()
+{
+    QString strChannelName = "";
+    if(ui->listWidget_ChannelList->currentItem())
+    {
+        strChannelName = ui->listWidget_ChannelList->currentItem()->text();
+    }
+    if(strChannelName == "")
+    {
+        QMessageBox::information(NULL, QString("提醒"), QString("请选择一个渠道!"));
+        return;
+    }
+
+    QVector<ChannelRelationInfo>& vecChannelRealationInfo = m_mapChannelRelationInfo[strChannelName];
+
+    ChannelRelationInfo tmpChannelRelationInfo;
+    tmpChannelRelationInfo.strPickServiceId = ui->lineEdit_ChannelPickServiceID->text();
+    tmpChannelRelationInfo.strShopProductId = ui->lineEdit_ShopProductID->text();
+    tmpChannelRelationInfo.strShopProductName = ui->lineEdit_ShopProductName->text();
+
+    QString strText = "是否删除" + tmpChannelRelationInfo.strShopProductId + "关联产品信息？";
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "提醒", strText, QMessageBox::Yes | QMessageBox::No);
+    if(QMessageBox::Yes == reply)
+    {
+        for(QVector<ChannelRelationInfo>::iterator iter = vecChannelRealationInfo.begin();
+            iter != vecChannelRealationInfo.end(); iter++)
+        {
+            if(tmpChannelRelationInfo.strShopProductId == iter->strShopProductId)
+            {
+                clearChannelRelationDetailUI();
+                vecChannelRealationInfo.erase(iter);
+                break;
+            }
+        }
+    }
+
+    updateChannelRelationDetailUI(strChannelName);
+}
+
+void MainWindow::on_pushButton_ChannelRelationCancel_clicked()
+{
+    clearChannelRelationDetailUI();
+}
+
+void MainWindow::clearChannelRelationDetailUI()
+{
+    ui->lineEdit_ChannelPickServiceID->clear();
+    ui->lineEdit_ShopProductID->clear();
+    ui->lineEdit_ShopProductName->clear();
 }

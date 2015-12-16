@@ -224,6 +224,23 @@ typedef struct PickServiceInfo
     }
 }PickServiceInfoStruct;
 
+//渠道管理
+typedef struct ChannelInfo
+{
+    QString strChannelName;      //渠道名称
+    QString strAccount;          //该渠道关联店铺账号
+    QString strPassword;         //该渠道关联店铺账号密码
+}ChannelInfoStruct;
+
+//渠道关联信息
+typedef struct ChannelRelationInfo
+{
+    QString strPickServiceId;    //地接产品ID
+    QString strShopProductId;    //该渠道关联店铺里产品ID
+    QString strShopProductName;  //该渠道关联店铺里产品名称
+}ChannelRelationInfoStruct;
+
+
 QString getRandomDigit(int iNum);
 QString getMidStr(QString & origin, const QString & first, const QString & last);
 QString getLeftStr(QString & origin, const QString & start);

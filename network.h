@@ -5,8 +5,9 @@
 #include <QThread>
 #include <QNetworkAccessManager>
 #include "captchadialog.h"
-#include "mainwindow.h"
 
+
+class MainWindow;
 /*
 class HttpWorker : public QObject
 {
