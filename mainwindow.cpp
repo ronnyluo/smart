@@ -300,7 +300,7 @@ void MainWindow::on_pushButtonUpdate_clicked()
             addItemToTicketList(tmpTicketInfo);
         }
     }
-    sendTicket(tmpTicketInfo);
+    updateTicket(tmpTicketInfo);
 }
 
 void MainWindow::on_pushButtonDelete_clicked()
@@ -645,7 +645,7 @@ void MainWindow::on_pushButton_ServiceUpdate_clicked()
             addItemToServiceList(tmpPickServiceInfo);
         }
     }
-    sendPickService(tmpPickServiceInfo);
+    updatePickService(tmpPickServiceInfo);
 }
 
 void MainWindow::on_pushButton_ServiceDelete_clicked()
@@ -726,7 +726,7 @@ void MainWindow::on_pushButton_ServicePrice_clicked()
     m_pPickServicePriceEditor->show();
 }
 
-void MainWindow::sendTicket(const TicketInfo & ticketInfo)
+void MainWindow::updateTicket(const TicketInfo & ticketInfo)
 {
     QJsonObject jsonObject;
     ticketInfo.writeTo(jsonObject);
@@ -745,7 +745,7 @@ void MainWindow::sendTicket(const TicketInfo & ticketInfo)
     connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyFinishedForTicket()));
 }
 
-void MainWindow::sendPickService(const PickServiceInfo & pickServiceInfo)
+void MainWindow::updatePickService(const PickServiceInfo & pickServiceInfo)
 {
     QJsonObject jsonObject;
     pickServiceInfo.writeTo(jsonObject);
@@ -949,7 +949,7 @@ void MainWindow::replyFinishedForLoadPickService()
     pNetworkReply->deleteLater();
 }
 
-void MainWindow::sendChannel(const ChannelInfo & channelInfo)
+void MainWindow::updateChannel(const ChannelInfo & channelInfo)
 {
     QJsonObject jsonObject;
     channelInfo.writeTo(jsonObject);
@@ -967,7 +967,7 @@ void MainWindow::sendChannel(const ChannelInfo & channelInfo)
     connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyUpdateChannel()));
 }
 
-void MainWindow::sendChannelRelation(const ChannelRelationInfo & channelRelationInfo)
+void MainWindow::updateChannelRelation(const ChannelRelationInfo & channelRelationInfo)
 {
     QJsonObject jsonObject;
     channelRelationInfo.writeTo(jsonObject);
@@ -1202,6 +1202,128 @@ void MainWindow::updateChannelList()
     }
 }
 
+
+void MainWindow::deleteChannel(const QString & strChannelName)
+{
+    QByteArray postData;
+    postData.append("op=delete&");
+    postData.append("channel_name=").append(strChannelName);
+
+    QNetworkRequest networkRequest;
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
+    networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
+    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/channel.cgi"));
+
+    QNetworkReply *pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyDeleteChannel()));
+
+}
+
+void MainWindow::deleteChannelRelation(const QString & strChannelName, const QString & strProductId)
+{
+    QByteArray postData;
+    postData.append("op=delete&");
+    postData.append("channel_name=").append(strChannelName);
+    postData.append("&product_id=").append(strProductId);
+
+    QNetworkRequest networkRequest;
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
+    networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
+    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/channelrelation.cgi"));
+
+    QNetworkReply *pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyDeleteChannelRelation()));
+}
+
+
+void MainWindow::replyDeleteChannel()
+{
+    QNetworkReply *pNetworkReply = qobject_cast<QNetworkReply*>(sender());
+
+    //获取响应的信息，状态码为200表示正常
+    QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    //无错误返回
+    if(pNetworkReply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = pNetworkReply->readAll();  //获取字节
+        QJsonDocument document = QJsonDocument::fromJson(bytes);
+        QJsonObject jsonObject = document.object();
+        QJsonValue jsonValue = jsonObject.value(QString("ret"));
+        if (jsonValue.isUndefined())
+        {
+            QMessageBox::information(NULL, QString("错误"), QString("返回json错误!"));
+        }
+        if (0 == jsonValue.toDouble())
+        {
+             QMessageBox::information(NULL, QString("提示"), QString("删除渠道信息成功"));
+        }
+        else
+        {
+            jsonValue = jsonObject.value(QString("msg"));
+            if (jsonValue.isUndefined())
+            {
+                  QMessageBox::information(NULL, QString("错误"), QString("删除渠道信息错误!"));
+            }
+            else
+            {
+                 QMessageBox::information(NULL, QString("错误"), QString("删除渠道信息错误!").append(jsonValue.toString()));
+            }
+        }
+
+    }
+    else
+    {
+        //处理错误
+        QMessageBox::information(NULL, QString("错误"), status.toString());
+    }
+    pNetworkReply->deleteLater();
+}
+
+void MainWindow::replyDeleteChannelRelation()
+{
+    QNetworkReply *pNetworkReply = qobject_cast<QNetworkReply*>(sender());
+
+    //获取响应的信息，状态码为200表示正常
+    QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    //无错误返回
+    if(pNetworkReply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = pNetworkReply->readAll();  //获取字节
+        QJsonDocument document = QJsonDocument::fromJson(bytes);
+        QJsonObject jsonObject = document.object();
+        QJsonValue jsonValue = jsonObject.value(QString("ret"));
+        if (jsonValue.isUndefined())
+        {
+            QMessageBox::information(NULL, QString("错误"), QString("返回json错误!"));
+        }
+        if (0 == jsonValue.toDouble())
+        {
+             QMessageBox::information(NULL, QString("提示"), QString("删除渠道关联信息成功"));
+        }
+        else
+        {
+            jsonValue = jsonObject.value(QString("msg"));
+            if (jsonValue.isUndefined())
+            {
+                  QMessageBox::information(NULL, QString("错误"), QString("删除渠道关联信息错误!"));
+            }
+            else
+            {
+                 QMessageBox::information(NULL, QString("错误"), QString("删除渠道关联信息错误!").append(jsonValue.toString()));
+            }
+        }
+
+    }
+    else
+    {
+        //处理错误
+        QMessageBox::information(NULL, QString("错误"), status.toString());
+    }
+    pNetworkReply->deleteLater();
+}
+
 void MainWindow::on_pushButton_ChannelUpdate_clicked()
 {
     qDebug() << "on_pushButton_ChannelUpdate_clicked";
@@ -1234,7 +1356,7 @@ void MainWindow::on_pushButton_ChannelUpdate_clicked()
             m_vecChannelInfo.push_back(tmpChannelInfo);
         }
     }
-
+    updateChannel(tmpChannelInfo);
     updateChannelList();
 }
 
@@ -1242,18 +1364,20 @@ void MainWindow::on_pushButton_ChannelDel_clicked()
 {
     QString strText = "是否删除" + ui->lineEdit_ChannelName->text() + "渠道信息？";
     QMessageBox::StandardButton reply = QMessageBox::question(this, "提醒", strText, QMessageBox::Yes | QMessageBox::No);
+    QString strChannelName;
     if(QMessageBox::Yes == reply)
     {
         for(QVector<ChannelInfo>::iterator iter = m_vecChannelInfo.begin(); iter != m_vecChannelInfo.end(); iter++ )
         {
             if(ui->lineEdit_ChannelName->text() == iter->strChannelName)
             {
+                strChannelName = iter->strChannelName;
                 m_vecChannelInfo.erase(iter);
                 break;
             }
         }
     }
-
+    deleteChannel(strChannelName);
     updateChannelList();
     ui->lineEdit_ChannelName->setText("");
     ui->lineEdit_Account->setText("");
@@ -1405,7 +1529,7 @@ void MainWindow::on_pushButton_ChannelRelationUpdate_clicked()
             vecChannelRealationInfo.push_back(tmpChannelRelationInfo);
         }
     }
-
+    updateChannelRelation(tmpChannelRelationInfo);
     updateChannelRelationDetailUI(strChannelName);
 }
 
@@ -1444,7 +1568,7 @@ void MainWindow::on_pushButton_ChannelRelationDel_clicked()
             }
         }
     }
-
+    deleteChannelRelation(strChannelName, tmpChannelRelationInfo.strShopProductId);
     updateChannelRelationDetailUI(strChannelName);
 }
 
