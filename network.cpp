@@ -186,7 +186,6 @@ void QunerHttp::replyLogin()
                                  ",ssl version:" + QSslSocket::sslLibraryVersionString());
     }
 
-    m_stream << "pNetworkReply=" << pNetworkReply << endl;
     pNetworkReply->deleteLater();
 }
 
@@ -219,7 +218,6 @@ void QunerHttp::replyReqSecApi()
                                  ",support ssl:" + QString(flag?"true":"false") +
                                  ",ssl version:" + QSslSocket::sslLibraryVersionString());
     }
-    m_stream << "pNetworkReply=" << pNetworkReply << endl;
     pNetworkReply->deleteLater();
 }
 
@@ -280,7 +278,6 @@ void QunerHttp::replyNeedCaptcha()
                                  ",ssl version:" + QSslSocket::sslLibraryVersionString());
     }
 
-    m_stream << "pNetworkReply=" << pNetworkReply << endl;
     pNetworkReply->deleteLater();
 
 }
@@ -307,7 +304,6 @@ void QunerHttp::replyReqQunerHome()
                                  ",support ssl:" + QString(flag?"true":"false") +
                                  ",ssl version:" + QSslSocket::sslLibraryVersionString());
     }
-    m_stream << "pNetworkReply=" << pNetworkReply << endl;
     pNetworkReply->deleteLater();
 }
 
@@ -361,7 +357,6 @@ void QunerHttp::replyGetVcode()
                                  ",support ssl:" + QString(flag?"true":"false") +
                                  ",ssl version:" + QSslSocket::sslLibraryVersionString());
     }
-    m_stream << "pNetworkReply=" << pNetworkReply << endl;
     pNetworkReply->deleteLater();
 }
 
@@ -402,7 +397,6 @@ void QunerHttp::getAnswerV1(QString& jsFunc, QString& answer)
     */
 
 
-    m_stream << jsFunc << endl;
 
     QString winFunName = getMidStr(jsFunc, "(function(", ")");
     QString tmp = jsFunc;
@@ -440,7 +434,6 @@ void QunerHttp::getAnswerV1(QString& jsFunc, QString& answer)
     finalEncryFun.replace("6666666", "bbb=" + bbb + ";");
     finalEncryFun.replace("88888888", lastEncryFunName);
     qDebug() << "finalEncryFun=" << finalEncryFun << endl;
-    m_stream << "finalEncryFun=" << finalEncryFun << endl;
 
     QJSEngine jsEngine;
     QJSValue error = jsEngine.evaluate(finalEncryFun);
@@ -822,7 +815,6 @@ void QunerHttp::replySetQunarPrice()
                                  ",ssl version:" + QSslSocket::sslLibraryVersionString());
     }
 
-    m_stream << "pNetworkReply=" << pNetworkReply << endl;
     pNetworkReply->deleteLater();
 }
 
