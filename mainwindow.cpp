@@ -19,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
     loadTicket();
     loadPickServce();
     ui->setupUi(this);
+    m_vecQunerHttPtr.push_back(new QunerHttp("uotscjr3824", "hkjr84626200", this));
+    m_vecQunerHttPtr[0]->login();
 
     resize(QSize(900, 600));
     ui->listWidget_Ticket->setAlternatingRowColors(true);

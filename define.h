@@ -240,6 +240,45 @@ typedef struct ChannelRelationInfo
     QString strShopProductName;  //该渠道关联店铺里产品名称
 }ChannelRelationInfoStruct;
 
+//价格更新
+typedef struct tagQunarPriceInfo
+{		/*
+        market_price:6520
+        adult_price:4260
+        room_send_price:1860
+        room_type:2
+        count:20
+        min_buy_count:1
+        max_buy_count:10
+        profit:0
+        price_desc:
+        dateString:2015-12-27
+        pId:2533826371
+        is_child_price:on
+        child_price:2700
+        child_price_desc:
+        is_taocan:off
+        */
+    QString market_price; //门市价
+    QString adult_price;  //成人价
+    QString room_send_price; //单房差
+    QString count; //库存
+    QString dateString; //日期
+    QString pId; //产品id
+    QString child_price; //儿童价
+    QString min_buy_count; //每单至少人数
+    QString max_buy_count; //每单至多人数
+
+    QString toPostForm()
+    {
+        return "market_price=" + market_price + "&adult_price=" +
+                adult_price + "&room_send_price=" + room_send_price +
+                "&count=" + count + "&dateString=" + dateString +
+                "&pId=" + pId + "&child_price=" + child_price +
+                "&min_buy_count=" + min_buy_count + "&max_buy_count=" +
+                max_buy_count;
+    }
+}QunarPriceInfo;
 
 QString getRandomDigit(int iNum);
 QString getMidStr(QString & origin, const QString & first, const QString & last);

@@ -3,8 +3,12 @@
 
 #include <QObject>
 #include <QThread>
+#include <QVector>
 #include <QNetworkAccessManager>
 #include "captchadialog.h"
+#include "define.h"
+#include <QFile>
+#include <QTextStream>
 
 
 class MainWindow;
@@ -70,8 +74,12 @@ class QunerHttp : public QObject
     Q_OBJECT
 public:
     QunerHttp(const QString & sUserName, const QString & sPassword, MainWindow * parent);
+    virtual ~QunerHttp();
     void setUserName(const QString & sUserName);
     void setPassword(const QString & sPassword);
+
+    void updateQunarPrice(QVector<QunarPriceInfo>& vecQunerPriceInfo);
+    void login();
 
 private slots:
     void replyLogin();
@@ -80,6 +88,7 @@ private slots:
     void replyReqQunerHome();
     void replyNeedCaptcha();
     void replyGetVcode();
+    void replySetQunarPrice();
     void getVcode(const QString & code);
 
 private:
@@ -90,6 +99,7 @@ private:
     void getAnswerV1(QString& jsFunc, QString& answer);
     void getCookie(QString & jsCode, QString & cookie);
     void reqVcode();
+    void setQunarPrice(const QByteArray & post);
 
 private:
     bool m_bNeedCaptcha;
@@ -101,6 +111,8 @@ private:
     QString m_sPassword;
     QNetworkAccessManager *m_pNetworkManager;
     MainWindow * m_pMainWindow;
+    QTextStream  m_stream;
+    QFile * m_pFile;
 };
 
 #endif // NETWORK_H

@@ -6,7 +6,6 @@
 #include <QJSValue>
 #include <QNetworkCookieJar>
 #include <QNetworkCookie>
-#include <QFile>
 #include <QMessageBox>
 #include "mainwindow.h"
 
@@ -43,9 +42,20 @@ QunerHttp::QunerHttp(const QString & sUserName, const QString & sPassword, MainW
     : m_sUserName(sUserName),
       m_sPassword(sPassword)
 {
+    m_pNetworkManager = new QNetworkAccessManager(this);
     m_pCaptchaDialog = new CaptchaDialog(parent);
-    connect(this, SIGNAL(CaptchaDialog::signalVcode(QString)), this, SLOT(getVcode(QString)));
+    connect(m_pCaptchaDialog, SIGNAL(signalVcode(QString)), this, SLOT(getVcode(QString)));
     m_pMainWindow = parent;
+
+    m_pFile = new QFile("debuglog.txt");
+    m_pFile->open(QIODevice::WriteOnly | QIODevice::Append);
+    m_stream.setDevice(m_pFile);
+}
+
+
+QunerHttp::~QunerHttp()
+{
+    delete m_pFile;
 }
 
 void QunerHttp::setUserName(const QString & sUserName)
@@ -72,9 +82,9 @@ void QunerHttp::reqSecApi()
                 QUrl("https://secapi.qunar.com/api/noCaptcha/get.json?callback=Query1720694714388697577_"
                      + time + "&_=" + time));
     networkRequest.setSslConfiguration(config);
-    QNetworkReply *pNetworkReplay =  m_pNetworkManager->get(networkRequest);
+    QNetworkReply *pNetworkReply =  m_pNetworkManager->get(networkRequest);
 
-    connect(pNetworkReplay, SIGNAL(finished()), this, SLOT(replyReqSecApi()));
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyReqSecApi()));
 }
 
 void QunerHttp::loginQuner(const QString & answer, const QString & cookie, const QString & code)
@@ -159,6 +169,11 @@ void QunerHttp::replyLogin()
                          ", login error:" + object["errmsg"].toString());
 
         }
+        else
+        {
+            QVector<QunarPriceInfo> vecTmp;
+            updateQunarPrice(vecTmp);
+        }
     }
     else
     {
@@ -169,6 +184,8 @@ void QunerHttp::replyLogin()
                                  ",support ssl:" + QString(flag?"true":"false") +
                                  ",ssl version:" + QSslSocket::sslLibraryVersionString());
     }
+
+    m_stream << "pNetworkReply=" << pNetworkReply << endl;
     pNetworkReply->deleteLater();
 }
 
@@ -201,6 +218,7 @@ void QunerHttp::replyReqSecApi()
                                  ",support ssl:" + QString(flag?"true":"false") +
                                  ",ssl version:" + QSslSocket::sslLibraryVersionString());
     }
+    m_stream << "pNetworkReply=" << pNetworkReply << endl;
     pNetworkReply->deleteLater();
 }
 
@@ -240,8 +258,7 @@ void QunerHttp::replyNeedCaptcha()
         QJsonObject object = document.object();
         if ("success" == object["errmsg"].toString())
         {
-            //m_bNeedCaptcha = object["data"].toBool();
-            m_bNeedCaptcha = true;
+            m_bNeedCaptcha = object["data"].toBool();
             qDebug() << "NeedCaptcha=" << (m_bNeedCaptcha ? "true" : "false") << endl;
             reqVcode();
         }
@@ -261,6 +278,8 @@ void QunerHttp::replyNeedCaptcha()
                                  ",support ssl:" + QString(flag?"true":"false") +
                                  ",ssl version:" + QSslSocket::sslLibraryVersionString());
     }
+
+    m_stream << "pNetworkReply=" << pNetworkReply << endl;
     pNetworkReply->deleteLater();
 
 }
@@ -287,6 +306,7 @@ void QunerHttp::replyReqQunerHome()
                                  ",support ssl:" + QString(flag?"true":"false") +
                                  ",ssl version:" + QSslSocket::sslLibraryVersionString());
     }
+    m_stream << "pNetworkReply=" << pNetworkReply << endl;
     pNetworkReply->deleteLater();
 }
 
@@ -301,9 +321,9 @@ void QunerHttp::reqVcode()
     networkRequest.setUrl(
                 QUrl("https://user.qunar.com/captcha/api/image?k={en7mni(z&p=ucenter_login&c=ef7d278eca6d25aa6aec7272d57f0a9a"));
     networkRequest.setSslConfiguration(config);
-    QNetworkReply *pNetworkReplay =  m_pNetworkManager->get(networkRequest);
+    QNetworkReply *pNetworkReply =  m_pNetworkManager->get(networkRequest);
 
-    connect(pNetworkReplay, SIGNAL(finished()), this, SLOT(replyGetVcode()));
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyGetVcode()));
 }
 
 void QunerHttp::replyGetVcode()
@@ -340,6 +360,7 @@ void QunerHttp::replyGetVcode()
                                  ",support ssl:" + QString(flag?"true":"false") +
                                  ",ssl version:" + QSslSocket::sslLibraryVersionString());
     }
+    m_stream << "pNetworkReply=" << pNetworkReply << endl;
     pNetworkReply->deleteLater();
 }
 
@@ -380,10 +401,7 @@ void QunerHttp::getAnswerV1(QString& jsFunc, QString& answer)
     */
 
 
-    QFile outFile("debuglog.txt");
-    outFile.open(QIODevice::WriteOnly | QIODevice::Append);
-    QTextStream ts(&outFile);
-    ts << jsFunc << endl;
+    m_stream << jsFunc << endl;
 
     QString winFunName = getMidStr(jsFunc, "(function(", ")");
     QString tmp = jsFunc;
@@ -421,7 +439,7 @@ void QunerHttp::getAnswerV1(QString& jsFunc, QString& answer)
     finalEncryFun.replace("6666666", "bbb=" + bbb + ";");
     finalEncryFun.replace("88888888", lastEncryFunName);
     qDebug() << "finalEncryFun=" << finalEncryFun << endl;
-    ts << "finalEncryFun=" << finalEncryFun << endl;
+    m_stream << "finalEncryFun=" << finalEncryFun << endl;
 
     QJSEngine jsEngine;
     QJSValue error = jsEngine.evaluate(finalEncryFun);
@@ -717,3 +735,99 @@ void QunerHttp::getAnswer(QString& jsFunc, QString& answer, QString& cookie)
     qDebug() << "cookie=" << param[3] << endl;
 }
 
+void QunerHttp::updateQunarPrice(QVector<QunarPriceInfo>& vecQunerPriceInfo)
+{
+    for (int i = 0; i < vecQunerPriceInfo.size(); i++)
+    {
+        setQunarPrice(vecQunerPriceInfo[i].toPostForm().toUtf8());
+    }
+    //Test
+    /*
+    QunarPriceInfo price;
+    price.adult_price = "4260";
+    price.child_price = "2700";
+    price.count = "20";
+    price.dateString = "2015-12-20";
+    price.market_price = "6250";
+    price.pId = "2533826371";
+    price.room_send_price = "1860";
+    price.min_buy_count = "2";
+    price.max_buy_count = "20";
+    setQunarPrice(price.toPostForm().toUtf8());
+    */
+
+}
+
+void QunerHttp::setQunarPrice(const QByteArray & post)
+{
+    m_stream << "setQunarPrice=" << QString(post) << endl;
+    QSslConfiguration config;
+    config.setPeerVerifyMode(QSslSocket::VerifyNone);
+    config.setProtocol(QSsl::TlsV1_0);
+
+    QNetworkRequest networkRequest;
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader,
+                             "application/x-www-form-urlencoded;charset=UTF-8");
+    networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, post.length());
+    networkRequest.setUrl(
+                QUrl("https://tb2cadmin.qunar.com/supplier/productTeamOperation.do?method=operatProductTeams&op=update"));
+    networkRequest.setSslConfiguration(config);
+
+    QList<QNetworkCookie> cookies =  m_pNetworkManager->cookieJar()->cookiesForUrl(
+                QUrl("https://tb2cadmin.qunar.com/supplier/productTeamOperation.do?method=operatProductTeams&op=update"));
+    for (int i = 0; i < cookies.size(); i++)
+    {
+        qDebug() << "cookie[" << i << "]=" << QString(cookies[i].toRawForm()) << endl;
+    }
+    QNetworkReply *pNetworkReply = m_pNetworkManager->post(networkRequest, post);
+
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replySetQunarPrice()));
+
+    connect(pNetworkReply, SIGNAL(sslErrors(QList<QSslError>)),
+            this, SLOT(sslErrors(QList<QSslError>)));
+}
+
+void QunerHttp::replySetQunarPrice()
+{
+    QNetworkReply* pNetworkReply = qobject_cast<QNetworkReply*>(sender());
+
+    //获取响应的信息，状态码为200表示正常
+    QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    //无错误返回
+    if(pNetworkReply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = pNetworkReply->readAll();  //获取字节
+        qDebug() << "SetQunarPrice statue=" << status.toInt() << ",content=" << QString(bytes) << endl;
+        QJsonDocument document = QJsonDocument::fromJson(bytes);
+        QJsonObject object = document.object();
+        if (object["ret"].toInt() <= 0)
+        {
+            qDebug() << "errmsg=" << object["message"].toString() << endl;
+            //处理错误
+            QMessageBox::information(NULL, QString("更新价格异常"), object["message"].toString());
+
+        }
+        m_stream << "setQunarPrice=" << QString(bytes) << endl;
+
+    }
+    else
+    {
+        bool flag = QSslSocket::supportsSsl();
+        //处理错误
+        QMessageBox::information(NULL, QString("错误"),
+                                 pNetworkReply->errorString() +
+                                 ",support ssl:" + QString(flag?"true":"false") +
+                                 ",ssl version:" + QSslSocket::sslLibraryVersionString());
+    }
+
+    m_stream << "pNetworkReply=" << pNetworkReply << endl;
+    pNetworkReply->deleteLater();
+}
+
+
+void QunerHttp::login()
+{
+    //启动登录流程
+    reqQunerHome();
+}
