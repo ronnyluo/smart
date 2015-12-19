@@ -230,6 +230,32 @@ typedef struct ChannelInfo
     QString strChannelName;      //渠道名称
     QString strAccount;          //该渠道关联店铺账号
     QString strPassword;         //该渠道关联店铺账号密码
+    QJsonObject& writeTo(QJsonObject & jsonObject)const
+    {
+        jsonObject.insert(QString("ChannelName"), QJsonValue(strChannelName));
+        jsonObject.insert(QString("Account"), QJsonValue(strAccount));
+        jsonObject.insert(QString("Password"), QJsonValue(strPassword));
+        return jsonObject;
+    }
+    void readFrom(QJsonObject & jsonObject)
+    {
+        QJsonValue jsonValue = jsonObject.value(QString("ChannelName"));
+        if (!jsonValue.isUndefined())
+        {
+            strChannelName = jsonValue.toString();
+        }
+        jsonValue = jsonObject.value(QString("Account"));
+        if (!jsonValue.isUndefined())
+        {
+            strAccount = jsonValue.toString();
+        }
+        jsonValue = jsonObject.value(QString("Password"));
+        if (!jsonValue.isUndefined())
+        {
+            strPassword = jsonValue.toString();
+        }
+        return ;
+    }
 }ChannelInfoStruct;
 
 //渠道关联信息
@@ -238,6 +264,41 @@ typedef struct ChannelRelationInfo
     QString strPickServiceId;    //地接产品ID
     QString strShopProductId;    //该渠道关联店铺里产品ID
     QString strShopProductName;  //该渠道关联店铺里产品名称
+    QString strChannelName;      //渠道名称
+
+    QJsonObject& writeTo(QJsonObject & jsonObject)const
+    {
+        jsonObject.insert(QString("PickServiceId"), QJsonValue(strPickServiceId));
+        jsonObject.insert(QString("ShopProductId"), QJsonValue(strShopProductId));
+        jsonObject.insert(QString("ShopProductName"), QJsonValue(strShopProductName));
+        jsonObject.insert(QString("ChannelName"), QJsonValue(strChannelName));
+        return jsonObject;
+    }
+    void readFrom(QJsonObject & jsonObject)
+    {
+        QJsonValue jsonValue = jsonObject.value(QString("PickServiceId"));
+        if (!jsonValue.isUndefined())
+        {
+            strPickServiceId = jsonValue.toString();
+        }
+        jsonValue = jsonObject.value(QString("ShopProductId"));
+        if (!jsonValue.isUndefined())
+        {
+            strShopProductId = jsonValue.toString();
+        }
+        jsonValue = jsonObject.value(QString("ShopProductName"));
+        if (!jsonValue.isUndefined())
+        {
+            strShopProductName = jsonValue.toString();
+        }
+        jsonValue = jsonObject.value(QString("ChannelName"));
+        if (!jsonValue.isUndefined())
+        {
+            strChannelName = jsonValue.toString();
+        }
+        return ;
+    }
+
 }ChannelRelationInfoStruct;
 
 //价格更新

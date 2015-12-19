@@ -48,10 +48,14 @@ private slots:
 
     void replyFinishedForTicket();
     void replyFinishedForPickService();
+    void replyUpdateChannel();
+    void replyUpdateChannelRelation();
+
 
     void replyFinishedForLoadTicket();
     void replyFinishedForLoadPickService();
-
+    void replyLoadChannel();
+    void replyLoadChannelRelation();
 
     void on_pushButton_ChannelUpdate_clicked();
     void on_pushButton_ChannelDel_clicked();
@@ -75,10 +79,16 @@ private:
     void addItemToServiceList(PickServiceInfo& serviceInfo);
     void clearServiceUI();
     void updateServiceUI(PickServiceInfo& serviceInfo);
+
     void sendTicket(const TicketInfo & ticketInfo);
     void sendPickService(const PickServiceInfo & pickServiceInfo);
+    void sendChannel(const ChannelInfo & channelInfo);
+    void sendChannelRelation(const ChannelRelationInfo & channelRelationInfo);
+
     void loadTicket();
     void loadPickServce();
+    void loadChannel();
+    void loadChannelRelation();
 
     //渠道管理
     void updateChannelList();

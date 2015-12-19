@@ -852,6 +852,7 @@ void MainWindow::replyFinishedForPickService()
         //处理错误
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
+    pNetworkReply->deleteLater();
 }
 
 void MainWindow::loadTicket()
@@ -913,7 +914,7 @@ void MainWindow::replyFinishedForLoadTicket()
         //处理错误
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
-    // pNetworkReply->deleteLater();
+    pNetworkReply->deleteLater();
 }
 
 void MainWindow::replyFinishedForLoadPickService()
@@ -945,7 +946,227 @@ void MainWindow::replyFinishedForLoadPickService()
         //处理错误
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
-    // pNetworkReply->deleteLater();
+    pNetworkReply->deleteLater();
+}
+
+void MainWindow::sendChannel(const ChannelInfo & channelInfo)
+{
+    QJsonObject jsonObject;
+    channelInfo.writeTo(jsonObject);
+    QJsonDocument jsonDocument(jsonObject);
+    QByteArray postData;
+    postData.append("op=update&");
+    postData.append("channel_name=").append(channelInfo.strChannelName);
+    postData.append("&channel_info=").append(jsonDocument.toJson());
+
+    QNetworkRequest networkRequest;
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
+    networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
+    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/channel.cgi"));
+    QNetworkReply* pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyUpdateChannel()));
+}
+
+void MainWindow::sendChannelRelation(const ChannelRelationInfo & channelRelationInfo)
+{
+    QJsonObject jsonObject;
+    channelRelationInfo.writeTo(jsonObject);
+    QJsonDocument jsonDocument(jsonObject);
+    QByteArray postData;
+    postData.append("op=update&");
+    postData.append("channel_name=").append(channelRelationInfo.strChannelName);
+    postData.append("product_id=").append(channelRelationInfo.strShopProductId);
+    postData.append("&channel_relation_info=").append(jsonDocument.toJson());
+
+    QNetworkRequest networkRequest;
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
+    networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
+    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/channelrelation.cgi"));
+    QNetworkReply* pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyUpdateChannelRelation()));
+}
+
+
+void MainWindow::replyUpdateChannel()
+{
+    QNetworkReply *pNetworkReply = qobject_cast<QNetworkReply*>(sender());
+
+    //获取响应的信息，状态码为200表示正常
+    QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    //无错误返回
+    if(pNetworkReply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = pNetworkReply->readAll();  //获取字节
+        QJsonDocument document = QJsonDocument::fromJson(bytes);
+        QJsonObject jsonObject = document.object();
+        QJsonValue jsonValue = jsonObject.value(QString("ret"));
+        if (jsonValue.isUndefined())
+        {
+            QMessageBox::information(NULL, QString("错误"), QString("返回json错误!"));
+        }
+        if (0 == jsonValue.toDouble())
+        {
+             QMessageBox::information(NULL, QString("提示"), QString("更新渠道信息成功"));
+        }
+        else
+        {
+            jsonValue = jsonObject.value(QString("msg"));
+            if (jsonValue.isUndefined())
+            {
+                  QMessageBox::information(NULL, QString("错误"), QString("更新渠道信息错误!"));
+            }
+            else
+            {
+                 QMessageBox::information(NULL, QString("错误"), QString("更新渠道信息错误!").append(jsonValue.toString()));
+            }
+        }
+
+    }
+    else
+    {
+        //处理错误
+        QMessageBox::information(NULL, QString("错误"), status.toString());
+    }
+    pNetworkReply->deleteLater();
+}
+
+void MainWindow::replyUpdateChannelRelation()
+{
+    QNetworkReply *pNetworkReply = qobject_cast<QNetworkReply*>(sender());
+
+    //获取响应的信息，状态码为200表示正常
+    QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    //无错误返回
+    if(pNetworkReply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = pNetworkReply->readAll();  //获取字节
+        QJsonDocument document = QJsonDocument::fromJson(bytes);
+        QJsonObject jsonObject = document.object();
+        QJsonValue jsonValue = jsonObject.value(QString("ret"));
+        if (jsonValue.isUndefined())
+        {
+            QMessageBox::information(NULL, QString("错误"), QString("返回json错误!"));
+        }
+        if (0 == jsonValue.toDouble())
+        {
+             QMessageBox::information(NULL, QString("提示"), QString("更新渠道关联信息成功"));
+        }
+        else
+        {
+            jsonValue = jsonObject.value(QString("msg"));
+            if (jsonValue.isUndefined())
+            {
+                  QMessageBox::information(NULL, QString("错误"), QString("更新渠道关联信息错误!"));
+            }
+            else
+            {
+                 QMessageBox::information(NULL, QString("错误"), QString("更新渠道关联信息错误!").append(jsonValue.toString()));
+            }
+        }
+
+    }
+    else
+    {
+        //处理错误
+        QMessageBox::information(NULL, QString("错误"), status.toString());
+    }
+    pNetworkReply->deleteLater();
+}
+
+
+void MainWindow::loadChannel()
+{
+    QByteArray postData;
+    postData.append("op=load&");
+
+    QNetworkRequest networkRequest;
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
+    networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
+    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/channel.cgi"));
+
+    QNetworkReply *pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyLoadChannel()));
+}
+
+void MainWindow::loadChannelRelation()
+{
+    QByteArray postData;
+    postData.append("op=load&");
+
+    QNetworkRequest networkRequest;
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
+    networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
+    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/channel.cgi"));
+
+    QNetworkReply *pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyLoadChannelRelation()));
+}
+
+void MainWindow::replyLoadChannel()
+{
+    QNetworkReply* pNetworkReply = qobject_cast<QNetworkReply*>(sender());
+
+    //获取响应的信息，状态码为200表示正常
+    QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    //无错误返回
+    if(pNetworkReply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = pNetworkReply->readAll();  //获取字节
+        QJsonDocument document = QJsonDocument::fromJson(bytes);
+        QJsonArray jsonArray = document.array();
+        for (QJsonArray::iterator it = jsonArray.begin(); it != jsonArray.end(); ++it)
+        {
+            QString sChannel = (*it).toObject()["channel_info"].toString();
+            QJsonParseError jsonParseErr;
+            QJsonDocument docChannel = QJsonDocument::fromJson(sChannel.toUtf8(), &jsonParseErr);
+            QJsonObject jsonObject = docChannel.object();
+            ChannelInfo channelInfo;
+            channelInfo.readFrom(jsonObject);
+            m_vecChannelInfo.push_back(channelInfo);
+        }
+    }
+    else
+    {
+        //处理错误
+        QMessageBox::information(NULL, QString("错误"), status.toString());
+    }
+    pNetworkReply->deleteLater();
+
+}
+
+void MainWindow::replyLoadChannelRelation()
+{
+    QNetworkReply* pNetworkReply = qobject_cast<QNetworkReply*>(sender());
+
+    //获取响应的信息，状态码为200表示正常
+    QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    //无错误返回
+    if(pNetworkReply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = pNetworkReply->readAll();  //获取字节
+        QJsonDocument document = QJsonDocument::fromJson(bytes);
+        QJsonArray jsonArray = document.array();
+        for (QJsonArray::iterator it = jsonArray.begin(); it != jsonArray.end(); ++it)
+        {
+            QString sChannelRelation = (*it).toObject()["channel_relation_info"].toString();
+            QJsonParseError jsonParseErr;
+            QJsonDocument docChannelRelation = QJsonDocument::fromJson(sChannelRelation.toUtf8(), &jsonParseErr);
+            QJsonObject jsonObject = docChannelRelation.object();
+            ChannelRelationInfo channelRelationInfo;
+            channelRelationInfo.readFrom(jsonObject);
+            m_mapChannelRelationInfo[channelRelationInfo.strChannelName].push_back(channelRelationInfo);
+        }
+    }
+    else
+    {
+        //处理错误
+        QMessageBox::information(NULL, QString("错误"), status.toString());
+    }
+    pNetworkReply->deleteLater();
 }
 
 void MainWindow::updateChannelList()
