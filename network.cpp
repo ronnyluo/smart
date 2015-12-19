@@ -45,6 +45,7 @@ QunerHttp::QunerHttp(const QString & sUserName, const QString & sPassword, MainW
     m_pNetworkManager = new QNetworkAccessManager(this);
     m_pCaptchaDialog = new CaptchaDialog(parent);
     connect(m_pCaptchaDialog, SIGNAL(signalVcode(QString)), this, SLOT(getVcode(QString)));
+    connect(m_pCaptchaDialog, SIGNAL(signalRefreshVcode()), this, SLOT(refreshVcode()));
     m_pMainWindow = parent;
 
     m_pFile = new QFile("debuglog.txt");
@@ -830,4 +831,8 @@ void QunerHttp::login()
 {
     //启动登录流程
     reqQunerHome();
+}
+void QunerHttp::refreshVcode()
+{
+    reqVcode();
 }

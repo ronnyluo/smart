@@ -43,3 +43,8 @@ void CaptchaDialog::on_pushButtonCancel_clicked()
 {
     this->hide();
 }
+
+void CaptchaDialog::on_pushButtonOk_refresh_clicked()
+{
+    emit signalRefreshVcode();
+}

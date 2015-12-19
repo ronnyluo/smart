@@ -90,6 +90,7 @@ private slots:
     void replyGetVcode();
     void replySetQunarPrice();
     void getVcode(const QString & code);
+    void refreshVcode();
 
 private:
     void reqQunerHome();

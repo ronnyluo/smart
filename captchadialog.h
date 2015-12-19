@@ -20,9 +20,11 @@ public:
 
 signals:
     void  signalVcode(const QString & code);
+    void  signalRefreshVcode();
 
 private slots:
     void on_pushButtonOk_clicked();
+    void on_pushButtonOk_refresh_clicked();
     void on_pushButtonCancel_clicked();
 
 private:
