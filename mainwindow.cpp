@@ -731,6 +731,11 @@ void MainWindow::on_pushButton_ServicePrice_clicked()
 
 void MainWindow::updateTicket(const TicketInfo & ticketInfo)
 {
+    if (ticketInfo.strTicketNo.isEmpty())
+    {
+        QMessageBox::information(NULL, QString("错误"), QString("机票ID不能为空"));
+        return ;
+    }
     QJsonObject jsonObject;
     ticketInfo.writeTo(jsonObject);
     QJsonDocument jsonDocument(jsonObject);
@@ -750,6 +755,11 @@ void MainWindow::updateTicket(const TicketInfo & ticketInfo)
 
 void MainWindow::updatePickService(const PickServiceInfo & pickServiceInfo)
 {
+    if (pickServiceInfo.strNo.isEmpty())
+    {
+        QMessageBox::information(NULL, QString("错误"), QString("地接ID不能为空"));
+        return ;
+    }
     QJsonObject jsonObject;
     pickServiceInfo.writeTo(jsonObject);
     QJsonDocument jsonDocument(jsonObject);
@@ -869,8 +879,7 @@ void MainWindow::loadTicket()
     networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/airticket.cgi"));
 
     QNetworkReply *pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
-    connect(pNetworkReply, SIGNAL(finished()),
-            this, SLOT(replyFinishedForLoadTicket()));
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyFinishedForLoadTicket()));
 }
 
 void MainWindow::loadPickServce()
@@ -954,6 +963,11 @@ void MainWindow::replyFinishedForLoadPickService()
 
 void MainWindow::updateChannel(const ChannelInfo & channelInfo)
 {
+    if (channelInfo.strChannelName.isEmpty())
+    {
+        QMessageBox::information(NULL, QString("错误"), QString("渠道名不能为空"));
+        return ;
+    }
     QJsonObject jsonObject;
     channelInfo.writeTo(jsonObject);
     QJsonDocument jsonDocument(jsonObject);
@@ -972,6 +986,16 @@ void MainWindow::updateChannel(const ChannelInfo & channelInfo)
 
 void MainWindow::updateChannelRelation(const ChannelRelationInfo & channelRelationInfo)
 {
+    if (channelRelationInfo.strChannelName.isEmpty())
+    {
+        QMessageBox::information(NULL, QString("错误"), QString("渠道名不能为空"));
+        return ;
+    }
+    if (channelRelationInfo.strShopProductId.isEmpty())
+    {
+        QMessageBox::information(NULL, QString("错误"), QString("产品ID不能为空"));
+        return ;
+    }
     QJsonObject jsonObject;
     channelRelationInfo.writeTo(jsonObject);
     QJsonDocument jsonDocument(jsonObject);
@@ -1209,6 +1233,11 @@ void MainWindow::updateChannelList()
 
 void MainWindow::deleteChannel(const QString & strChannelName)
 {
+    if (strChannelName.isEmpty())
+    {
+        QMessageBox::information(NULL, QString("错误"), QString("渠道名称不能为空"));
+        return ;
+    }
     QByteArray postData;
     postData.append("op=delete&");
     postData.append("channel_name=").append(strChannelName);
@@ -1225,6 +1254,16 @@ void MainWindow::deleteChannel(const QString & strChannelName)
 
 void MainWindow::deleteChannelRelation(const QString & strChannelName, const QString & strProductId)
 {
+    if (strChannelName.isEmpty())
+    {
+        QMessageBox::information(NULL, QString("错误"), QString("渠道名称不能为空"));
+        return ;
+    }
+    if (strProductId.isEmpty())
+    {
+        QMessageBox::information(NULL, QString("错误"), QString("关联的产品ID不能为空"));
+        return ;
+    }
     QByteArray postData;
     postData.append("op=delete&");
     postData.append("channel_name=").append(strChannelName);
