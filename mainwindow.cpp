@@ -18,6 +18,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     loadTicket();
     loadPickServce();
+    loadChannel();
+    loadChannelRelation();
+
     ui->setupUi(this);
     m_vecQunerHttPtr.push_back(new QunerHttp("uotscjr3824", "hkjr84626200", this));
 
@@ -975,7 +978,7 @@ void MainWindow::updateChannelRelation(const ChannelRelationInfo & channelRelati
     QByteArray postData;
     postData.append("op=update&");
     postData.append("channel_name=").append(channelRelationInfo.strChannelName);
-    postData.append("product_id=").append(channelRelationInfo.strShopProductId);
+    postData.append("&product_id=").append(channelRelationInfo.strShopProductId);
     postData.append("&channel_relation_info=").append(jsonDocument.toJson());
 
     QNetworkRequest networkRequest;
@@ -1098,7 +1101,7 @@ void MainWindow::loadChannelRelation()
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
     networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
-    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/channel.cgi"));
+    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/channelrelation.cgi"));
 
     QNetworkReply *pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
     connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyLoadChannelRelation()));
@@ -1160,6 +1163,7 @@ void MainWindow::replyLoadChannelRelation()
             channelRelationInfo.readFrom(jsonObject);
             m_mapChannelRelationInfo[channelRelationInfo.strChannelName].push_back(channelRelationInfo);
         }
+        //updateChannelRelationDetailUI(strChannelName);
     }
     else
     {
@@ -1529,6 +1533,7 @@ void MainWindow::on_pushButton_ChannelRelationUpdate_clicked()
             vecChannelRealationInfo.push_back(tmpChannelRelationInfo);
         }
     }
+    tmpChannelRelationInfo.strChannelName = strChannelName;
     updateChannelRelation(tmpChannelRelationInfo);
     updateChannelRelationDetailUI(strChannelName);
 }
