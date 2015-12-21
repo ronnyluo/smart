@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>474</width>
+    <height>384</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,18 +33,28 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="topMargin">
-      <number>69</number>
+      <number>72</number>
      </property>
      <item>
       <layout class="QGridLayout" name="gridLayout">
        <item row="0" column="0">
+        <widget class="QLabel" name="label_RetailPrice">
+         <property name="text">
+          <string>门市价：</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="lineEdit_RetailPrice"/>
+       </item>
+       <item row="1" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
           <string>成人价格：</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="1" column="1">
         <widget class="QLineEdit" name="lineEdit_AdultPrice">
          <property name="enabled">
           <bool>true</bool>
@@ -57,14 +67,14 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item row="2" column="0">
         <widget class="QLabel" name="label_2">
          <property name="text">
           <string>儿童价格：</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
+       <item row="2" column="1">
         <widget class="QLineEdit" name="lineEdit_ChildPrice">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -74,14 +84,14 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
+       <item row="3" column="0">
         <widget class="QLabel" name="label_SingleRoom">
          <property name="text">
           <string>单房差价：</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="3" column="1">
         <widget class="QLineEdit" name="lineEdit_SingleRoom">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -91,14 +101,44 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_Stock">
+         <property name="text">
+          <string>库存：</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="lineEdit_Stock"/>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_MinPerOrder">
+         <property name="text">
+          <string>每单最少：</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLineEdit" name="lineEdit_MinPerOrder"/>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_MaxPerOrder">
+         <property name="text">
+          <string>每单最多：</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QLineEdit" name="lineEdit_MaxPerOrder"/>
+       </item>
+       <item row="7" column="0">
         <widget class="QLabel" name="label_AdultTotal">
          <property name="text">
           <string>成人总价：</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
+       <item row="7" column="1">
         <widget class="QLineEdit" name="lineEdit_AdultTotal">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -108,14 +148,14 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="8" column="0">
         <widget class="QLabel" name="label_ChildTotal">
          <property name="text">
           <string>儿童总价：</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="8" column="1">
         <widget class="QLineEdit" name="lineEdit_ChildTotal">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">

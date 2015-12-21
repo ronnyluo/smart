@@ -35,6 +35,10 @@ private slots:
     void calendarItemCheckSlot(CalendarItem* item, bool bCheck);
     void on_pushButton_back_clicked();
     void singleRoomLienEditChanged(QString strSingleRoom);
+    void retailPriceLineEditChanged(QString strRetailPrice);
+    void stockLineEditChanged(QString strStock);
+    void minPerOrderLineEditChanged(QString strMinPerOrder);
+    void maxPerOrderLineEditChanged(QString strMaxPerOrder);
 
 private:
     bool eventFilter(QObject *target, QEvent *event);
