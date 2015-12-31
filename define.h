@@ -25,6 +25,10 @@ typedef struct TicketPriceInfo
     int nTicketAdultPrice;               //成人票价
     int nTicketChildPrice;               //儿童票价
     int nSigleRoomSpread;                //单房差价
+    int nTicketRetailPrice;              //门市价
+    int nTicketStock;                    //库存
+    int nMinPerOrder;                    //每单最小
+    int nMaxPerOrder;                    //每单最多
     QJsonObject& writeTo(QJsonObject & jsonObject)const
     {
         jsonObject.insert(QString("TicketAdultPrice"), QJsonValue(nTicketAdultPrice));

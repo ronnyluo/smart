@@ -32,13 +32,17 @@ public:
     void setSelectMode(SelectMode mode);
     void setHelpPriceInfo(QMap<QString, QMap<QString, TicketPriceInfo> > &mapTicketPriceInfo);
     TicketPriceInfo getHelpPriceInfo(QString strDay);
+    void updateRetailPrice(QString strDay, int nRetailPrice);
+    void updateStock(QString strDay, int nStock);
+    void updateMinPerOrder(QString strDay, int nMinPerOrder);
+    void updateMaxPerOrder(QString strDay, int nMaxPerOrder);
+    TicketPriceInfo getPrice(QString strDay);
 
 
 private:
     bool IsLeapYear(int year);
     int NumLeapYear( int year);
     int DaysOfMonth(int nYear, int nMonth);
-    TicketPriceInfo getPrice(QString strDay);
     int getDefaultSelectDay(int nYear, int nMonth);
 
 signals:

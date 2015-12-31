@@ -19,12 +19,25 @@ PriceEditor::PriceEditor(QWidget *parent, PriceEditorMode mode) :
         ui->lineEdit_SingleRoom->hide();
         ui->lineEdit_AdultTotal->hide();
         ui->lineEdit_ChildTotal->hide();
+
+        ui->label_RetailPrice->hide();
+        ui->lineEdit_RetailPrice->hide();
+        ui->label_Stock->hide();
+        ui->lineEdit_Stock->hide();
+        ui->label_MinPerOrder->hide();
+        ui->lineEdit_MinPerOrder->hide();
+        ui->label_MaxPerOrder->hide();
+        ui->lineEdit_MaxPerOrder->hide();
     }
     ui->lineEdit_AdultTotal->setReadOnly(true);
     ui->lineEdit_ChildTotal->setReadOnly(true);
     ui->lineEdit_AdultPrice->setValidator(new QIntValidator(1, 999999, ui->lineEdit_AdultPrice));
     ui->lineEdit_ChildPrice->setValidator(new QIntValidator(1, 999999, ui->lineEdit_ChildPrice));
     ui->lineEdit_SingleRoom->setValidator(new QIntValidator(1, 999999, ui->lineEdit_SingleRoom));
+    ui->lineEdit_RetailPrice->setValidator(new QIntValidator(1, 999999, ui->lineEdit_RetailPrice));
+    ui->lineEdit_Stock->setValidator(new QIntValidator(1, 999999, ui->lineEdit_Stock));
+    ui->lineEdit_MaxPerOrder->setValidator(new QIntValidator(1, 999999, ui->lineEdit_MaxPerOrder));
+    ui->lineEdit_MinPerOrder->setValidator(new QIntValidator(1, 999999, ui->lineEdit_MinPerOrder));
 
     for(int i=0; i<7; i++)
     {
@@ -38,6 +51,10 @@ PriceEditor::PriceEditor(QWidget *parent, PriceEditorMode mode) :
     connect(ui->lineEdit_AdultPrice, SIGNAL(textChanged(QString)), this, SLOT(adultPriceLienEditChanged(QString)));
     connect(ui->lineEdit_ChildPrice, SIGNAL(textChanged(QString)), this, SLOT(childPriceLienEditChanged(QString)));
     connect(ui->lineEdit_SingleRoom, SIGNAL(textChanged(QString)), this, SLOT(singleRoomLienEditChanged(QString)));
+    connect(ui->lineEdit_RetailPrice, SIGNAL(textChanged(QString)), this, SLOT(retailPriceLineEditChanged(QString)));
+    connect(ui->lineEdit_Stock, SIGNAL(textChanged(QString)), this, SLOT(stockLineEditChanged(QString)));
+    connect(ui->lineEdit_MinPerOrder, SIGNAL(textChanged(QString)), this, SLOT(minPerOrderLineEditChanged(QString)));
+    connect(ui->lineEdit_MaxPerOrder, SIGNAL(textChanged(QString)), this, SLOT(maxPerOrderLineEditChanged(QString)));
 }
 
 PriceEditor::~PriceEditor()
@@ -136,11 +153,59 @@ void PriceEditor::showPriceOnRightUI(CalendarItem* item)
     {
         ui->lineEdit_AdultTotal->setText(QString::number(nAdultPrice));
     }
+    else
+    {
+        ui->lineEdit_AdultTotal->setText("");
+    }
 
     int nChildPrice = item->getChildPrice().toInt() + ui->widgetCalendar->getHelpPriceInfo(item->getText()).nTicketChildPrice;
     if(nChildPrice > 0)
     {
         ui->lineEdit_ChildTotal->setText(QString::number(nChildPrice));
+    }
+    else
+    {
+        ui->lineEdit_ChildTotal->setText("");
+    }
+
+    int nRetailPrice = ui->widgetCalendar->getPrice(item->getText()).nTicketRetailPrice;
+    if(nRetailPrice > 0)
+    {
+        ui->lineEdit_RetailPrice->setText(QString::number(nRetailPrice));
+    }
+    else
+    {
+        ui->lineEdit_RetailPrice->setText("");
+    }
+
+    int nStock = ui->widgetCalendar->getPrice(item->getText()).nTicketStock;
+    if(nStock > 0)
+    {
+        ui->lineEdit_Stock->setText(QString::number(nStock));
+    }
+    else
+    {
+        ui->lineEdit_Stock->setText("");
+    }
+
+    int nMinPerOrder = ui->widgetCalendar->getPrice(item->getText()).nMinPerOrder;
+    if(nMinPerOrder > 0)
+    {
+        ui->lineEdit_MinPerOrder->setText(QString::number(nMinPerOrder));
+    }
+    else
+    {
+        ui->lineEdit_MinPerOrder->setText("");
+    }
+
+    int nMaxPerOrder = ui->widgetCalendar->getPrice(item->getText()).nMaxPerOrder;
+    if(nMaxPerOrder > 0)
+    {
+        ui->lineEdit_MaxPerOrder->setText(QString::number(nMaxPerOrder));
+    }
+    else
+    {
+        ui->lineEdit_MaxPerOrder->setText("");
     }
 }
 
@@ -191,6 +256,62 @@ void PriceEditor::singleRoomLienEditChanged(QString strSingleRoom)
             {
                 ui->widgetCalendar->m_pCalendarItemArray[i][j]->setSingleRoom(strSingleRoom);
                 ui->widgetCalendar->updateSingleRoomPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strSingleRoom.toInt());
+            }
+        }
+    }
+}
+
+void PriceEditor::retailPriceLineEditChanged(QString strRetailPrice)
+{
+    for(int i=1; i<7; i++)
+    {
+        for(int j=0; j<7; j++)
+        {
+            if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked() && ""!=ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText())
+            {
+                ui->widgetCalendar->updateRetailPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strRetailPrice.toInt());
+            }
+        }
+    }
+}
+
+void PriceEditor::stockLineEditChanged(QString strStock)
+{
+    for(int i=1; i<7; i++)
+    {
+        for(int j=0; j<7; j++)
+        {
+            if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked() && ""!=ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText())
+            {
+                ui->widgetCalendar->updateStock(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strStock.toInt());
+            }
+        }
+    }
+}
+
+void PriceEditor::minPerOrderLineEditChanged(QString strMinPerOrder)
+{
+    for(int i=1; i<7; i++)
+    {
+        for(int j=0; j<7; j++)
+        {
+            if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked() && ""!=ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText())
+            {
+                ui->widgetCalendar->updateMinPerOrder(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strMinPerOrder.toInt());
+            }
+        }
+    }
+}
+
+void PriceEditor::maxPerOrderLineEditChanged(QString strMaxPerOrder)
+{
+    for(int i=1; i<7; i++)
+    {
+        for(int j=0; j<7; j++)
+        {
+            if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked() && ""!=ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText())
+            {
+                ui->widgetCalendar->updateMaxPerOrder(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strMaxPerOrder.toInt());
             }
         }
     }

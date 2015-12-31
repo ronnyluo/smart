@@ -298,6 +298,32 @@ void Calendar::updateSingleRoomPrice(QString strDay, int nSingleRoomPrice)
     emit updatePriceInfoSignal(m_mapTicketPriceInfo);
 }
 
+void Calendar::updateRetailPrice(QString strDay, int nRetailPrice)
+{
+    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketRetailPrice = nRetailPrice;
+    emit updatePriceInfoSignal(m_mapTicketPriceInfo);
+}
+
+void Calendar::updateStock(QString strDay, int nStock)
+{
+    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketStock = nStock;
+    emit updatePriceInfoSignal(m_mapTicketPriceInfo);
+}
+
+void Calendar::updateMinPerOrder(QString strDay, int nMinPerOrder)
+{
+    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nMinPerOrder = nMinPerOrder;
+    emit updatePriceInfoSignal(m_mapTicketPriceInfo);
+}
+
+void Calendar::updateMaxPerOrder(QString strDay, int nMaxPerOrder)
+{
+    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nMaxPerOrder = nMaxPerOrder;
+    emit updatePriceInfoSignal(m_mapTicketPriceInfo);
+}
+
+
+
 void Calendar::on_pushButton_SelectMode_clicked()
 {
     if(SELECTMODE_SINGLE == m_selectMode)
