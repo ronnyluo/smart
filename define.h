@@ -11,7 +11,7 @@
 const QString QSS_CONFIG_FILE_PATH = "../smart/stylesheet.txt";
 const QString PICTURE_FILE_PATH = "../smart/picture.png";
 
-const QString SERVER_DOMAIN = "http://112.74.30.99:8000";
+const QString SERVER_DOMAIN = "http://163.125.226.95:3000";
 
 //编译发布时使用
 //const QString QSS_CONFIG_FILE_PATH = "stylesheet.txt";
