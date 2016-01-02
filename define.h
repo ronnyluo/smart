@@ -8,14 +8,14 @@
 #include <QtGlobal>
 
 //调试时使用
-const QString QSS_CONFIG_FILE_PATH = "../smart/stylesheet.txt";
-const QString PICTURE_FILE_PATH = "../smart/picture.png";
+//const QString QSS_CONFIG_FILE_PATH = "../smart/stylesheet.txt";
+//const QString PICTURE_FILE_PATH = "../smart/picture.png";
 
-const QString SERVER_DOMAIN = "http://163.125.226.95:3000";
+const QString SERVER_DOMAIN = "http://58.250.190.74:3000";
 
 //编译发布时使用
-//const QString QSS_CONFIG_FILE_PATH = "stylesheet.txt";
-//const QString PICTURE_FILE_PATH = "picture.png";
+const QString QSS_CONFIG_FILE_PATH = "stylesheet.txt";
+const QString PICTURE_FILE_PATH = "picture.png";
 
 //票价信息
 //1机票票价：nTicketAdultPrice（成人票价），nTicketChildPrice（儿童票价）
@@ -29,11 +29,16 @@ typedef struct TicketPriceInfo
     int nTicketStock;                    //库存
     int nMinPerOrder;                    //每单最小
     int nMaxPerOrder;                    //每单最多
+    bool bUpdate;                        //是否需要向去哪儿网更新
     QJsonObject& writeTo(QJsonObject & jsonObject)const
     {
         jsonObject.insert(QString("TicketAdultPrice"), QJsonValue(nTicketAdultPrice));
         jsonObject.insert(QString("TicketChildPrice"), QJsonValue(nTicketChildPrice));
         jsonObject.insert(QString("SigleRoomSpread"), QJsonValue(nSigleRoomSpread));
+        jsonObject.insert(QString("TicketRetailPrice"), QJsonValue(nTicketRetailPrice));
+        jsonObject.insert(QString("TicketStock"), QJsonValue(nTicketStock));
+        jsonObject.insert(QString("MinPerOrder"), QJsonValue(nMinPerOrder));
+        jsonObject.insert(QString("MaxPerOrder"), QJsonValue(nMaxPerOrder));
         return jsonObject;
     }
     void readFrom(QJsonObject & jsonObject)
@@ -52,6 +57,26 @@ typedef struct TicketPriceInfo
         if (!jsonValue.isUndefined())
         {
             nSigleRoomSpread = jsonValue.toDouble();
+        }
+        jsonValue = jsonObject.value(QString("TicketRetailPrice"));
+        if (!jsonValue.isUndefined())
+        {
+            nTicketRetailPrice = jsonValue.toDouble();
+        }
+        jsonValue = jsonObject.value(QString("TicketStock"));
+        if (!jsonValue.isUndefined())
+        {
+            nTicketStock = jsonValue.toDouble();
+        }
+        jsonValue = jsonObject.value(QString("MinPerOrder"));
+        if (!jsonValue.isUndefined())
+        {
+            nMinPerOrder = jsonValue.toDouble();
+        }
+        jsonValue = jsonObject.value(QString("MaxPerOrder"));
+        if (!jsonValue.isUndefined())
+        {
+            nMaxPerOrder = jsonValue.toDouble();
         }
         return ;
     }

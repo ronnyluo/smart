@@ -28,6 +28,7 @@ public:
     void getPriceInfo(QMap<QString, QMap<QString, TicketPriceInfo> >&mapTicketPriceInfo);
     Calendar* getCalendar();
     void show();
+    void clearUpdateFlag();
 
 private slots:
     void adultPriceLienEditChanged(QString strAdultPrice);

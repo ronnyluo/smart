@@ -73,13 +73,17 @@ class QunerHttp : public QObject
 {
     Q_OBJECT
 public:
-    QunerHttp(const QString & sUserName, const QString & sPassword, MainWindow * parent);
+    QunerHttp(const QString & sUserName, const QString & sPassword, const QString& strChannelName, MainWindow * parent);
     virtual ~QunerHttp();
+    QString GetUserName() {return m_sUserName;}
+    QString GetChannelName(){return m_sChannelName;}
+
     void setUserName(const QString & sUserName);
     void setPassword(const QString & sPassword);
 
     void updateQunarPrice(QVector<QunarPriceInfo>& vecQunerPriceInfo);
     void login();
+    void setQunarPrice4Update(QVector<QunarPriceInfo>& vecQunerPriceInfo);
 
 private slots:
     void replyLogin();
@@ -114,6 +118,8 @@ private:
     MainWindow * m_pMainWindow;
     QTextStream  m_stream;
     QFile * m_pFile;
+    QString m_sChannelName;
+    QVector<QunarPriceInfo> m_vecQunerPriceInfo;
 };
 
 #endif // NETWORK_H

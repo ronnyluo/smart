@@ -37,6 +37,7 @@ public:
     void updateMinPerOrder(QString strDay, int nMinPerOrder);
     void updateMaxPerOrder(QString strDay, int nMaxPerOrder);
     TicketPriceInfo getPrice(QString strDay);
+    void clearUpdateFlag();
 
 
 private:

@@ -38,9 +38,10 @@ void UpdatePickServiceController::updatePickService(const QString &postData)
 */
 
 
-QunerHttp::QunerHttp(const QString & sUserName, const QString & sPassword, MainWindow * parent)
+QunerHttp::QunerHttp(const QString & sUserName, const QString & sPassword, const QString &strChannelName, MainWindow * parent)
     : m_sUserName(sUserName),
-      m_sPassword(sPassword)
+      m_sPassword(sPassword),
+      m_sChannelName(strChannelName)
 {
     m_pNetworkManager = new QNetworkAccessManager(this);
     m_pCaptchaDialog = new CaptchaDialog(parent);
@@ -172,8 +173,7 @@ void QunerHttp::replyLogin()
         }
         else
         {
-            QVector<QunarPriceInfo> vecTmp;
-            updateQunarPrice(vecTmp);
+            updateQunarPrice(m_vecQunerPriceInfo);
         }
     }
     else
@@ -727,6 +727,11 @@ void QunerHttp::getAnswer(QString& jsFunc, QString& answer, QString& cookie)
     }
     cookie = param[3].left(param[3].indexOf("domain"));
     qDebug() << "cookie=" << param[3] << endl;
+}
+
+void QunerHttp::setQunarPrice4Update(QVector<QunarPriceInfo> &vecQunerPriceInfo)
+{
+    m_vecQunerPriceInfo = vecQunerPriceInfo;
 }
 
 void QunerHttp::updateQunarPrice(QVector<QunarPriceInfo>& vecQunerPriceInfo)

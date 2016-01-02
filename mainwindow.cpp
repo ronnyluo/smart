@@ -22,7 +22,6 @@ MainWindow::MainWindow(QWidget *parent) :
     loadChannelRelation();
 
     ui->setupUi(this);
-    m_vecQunerHttPtr.push_back(new QunerHttp("uotscjr3824", "hkjr84626200", this));
 
     resize(QSize(900, 600));
     ui->listWidget_Ticket->setAlternatingRowColors(true);
@@ -71,6 +70,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->listWidget_ChannelList, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), this, SLOT(channelListCurrentItemChanged(QListWidgetItem *, QListWidgetItem *)));
 
+    connect(ui->tableWidget_ChannelRelation, SIGNAL(itemClicked(QTableWidgetItem *)), this, SLOT(channelRelationCurrentItemClicked(QTableWidgetItem *)));
+
     //渠道暂时不需要搜索功能
     ui->label_ChannelFind->hide();
     ui->lineEdit_ChannelFind->hide();
@@ -79,8 +80,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QImage *image=new QImage(PICTURE_FILE_PATH);
     ui->label_Picture->setPixmap(QPixmap::fromImage(*image));
 
-
-    initUI();
     //reqQunerHome();
 }
 
@@ -99,7 +98,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::initUI()
 {
-    updateChannelList();
+    updateChannelListUI();
 }
 
 void MainWindow::tabWidgetCurrentChanged(int index)
@@ -112,7 +111,7 @@ void MainWindow::tabWidgetCurrentChanged(int index)
     case 2:
         break;
     case 3:
-        updateChannelList();
+        updateChannelListUI();
         break;
     case 4:
         updateChannelRelationUI();
@@ -304,6 +303,16 @@ void MainWindow::on_pushButtonUpdate_clicked()
         }
     }
     updateTicket(tmpTicketInfo);
+
+    for(int i=0; i<m_vecPickServiceInfo.size(); i++)
+    {
+        if(m_vecPickServiceInfo[i].strTicketNo == tmpTicketInfo.strTicketNo)
+        {
+            update2Qunaer(tmpTicketInfo, m_vecPickServiceInfo[i]);
+        }
+    }
+    m_pPriceEditor->clearUpdateFlag();
+
 }
 
 void MainWindow::on_pushButtonDelete_clicked()
@@ -649,6 +658,15 @@ void MainWindow::on_pushButton_ServiceUpdate_clicked()
         }
     }
     updatePickService(tmpPickServiceInfo);
+
+    for(int i=0; i<m_vecTicketInfo.size(); i++)
+    {
+        if(tmpPickServiceInfo.strTicketNo == m_vecTicketInfo[i].strTicketNo)
+        {
+            update2Qunaer(m_vecTicketInfo[i], tmpPickServiceInfo);
+        }
+    }
+    m_pPickServicePriceEditor->clearUpdateFlag();
 }
 
 void MainWindow::on_pushButton_ServiceDelete_clicked()
@@ -704,28 +722,28 @@ void MainWindow::on_pushButton_ServicePrice_clicked()
         {
             qDebug() << "on_pushButton_ServicePrice_clicked:" << ui->lineEdit_ServiceName->text();
             m_pPickServicePriceEditor->setPriceInfo(m_vecPickServiceInfo[i].mapTicketPriceInfo);
+            qDebug () << "setHelpPriceInfo" << m_vecTicketInfo.size();
+            for(int j=0; j<m_vecTicketInfo.size(); j++)
+            {
+                //查到关联的机票产品信息
+                qDebug() << "m_vecPickServiceInfo[i].strTicketNo:" << m_vecPickServiceInfo[i].strTicketNo;
+                qDebug() << "m_vecTicketInfo[j].strTicketNo:" << m_vecTicketInfo[j].strTicketNo;
+                qDebug() << "ui->lineEdit_ServiceTicketNo->text():" << ui->lineEdit_ServiceTicketNo->text();
+
+                if(m_vecPickServiceInfo[i].strTicketNo == m_vecTicketInfo[j].strTicketNo
+                   || ui->lineEdit_ServiceTicketNo->text() == m_vecTicketInfo[j].strTicketNo)
+                {
+                    qDebug () << "setHelpPriceInfo";
+                    m_pPickServicePriceEditor->setHelpPriceInfo(m_vecTicketInfo[j].mapTicketPriceInfo);
+                    qDebug() << "nTicketAdultPrice:" << m_vecTicketInfo[j].mapTicketPriceInfo["201511"]["8"].nTicketAdultPrice;
+                    qDebug() << "nTicketChildPrice:" << m_vecTicketInfo[j].mapTicketPriceInfo["201511"]["8"].nTicketChildPrice;
+                    break;
+                }
+            }
             break;
         }
     }
 
-    qDebug () << "setHelpPriceInfo" << m_vecTicketInfo.size();
-    for(int j=0; j<m_vecTicketInfo.size(); j++)
-    {
-        //查到关联的机票产品信息
-        qDebug() << "m_vecPickServiceInfo[i].strTicketNo:" << m_vecPickServiceInfo[i].strTicketNo;
-        qDebug() << "m_vecTicketInfo[j].strTicketNo:" << m_vecTicketInfo[j].strTicketNo;
-        qDebug() << "ui->lineEdit_ServiceTicketNo->text():" << ui->lineEdit_ServiceTicketNo->text();
-
-        if(m_vecPickServiceInfo[i].strTicketNo == m_vecTicketInfo[j].strTicketNo
-           || ui->lineEdit_ServiceTicketNo->text() == m_vecTicketInfo[j].strTicketNo)
-        {
-            qDebug () << "setHelpPriceInfo";
-            m_pPickServicePriceEditor->setHelpPriceInfo(m_vecTicketInfo[j].mapTicketPriceInfo);
-            qDebug() << "nTicketAdultPrice:" << m_vecTicketInfo[j].mapTicketPriceInfo["201511"]["8"].nTicketAdultPrice;
-            qDebug() << "nTicketChildPrice:" << m_vecTicketInfo[j].mapTicketPriceInfo["201511"]["8"].nTicketChildPrice;
-            break;
-        }
-    }
     m_pPickServicePriceEditor->show();
 }
 
@@ -926,6 +944,8 @@ void MainWindow::replyFinishedForLoadTicket()
         //处理错误
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
+    qDebug() << "m_vecTicketInfo.szie():" << m_vecTicketInfo.size();
+    updateTicketUI();
     pNetworkReply->deleteLater();
 }
 
@@ -958,6 +978,8 @@ void MainWindow::replyFinishedForLoadPickService()
         //处理错误
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
+    qDebug() << "m_vecPickServiceInfo.size()" << m_vecPickServiceInfo.size();
+    updatePickServiceUI();
     pNetworkReply->deleteLater();
 }
 
@@ -1160,6 +1182,10 @@ void MainWindow::replyLoadChannel()
         //处理错误
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
+    for(int i=0; i<m_vecChannelInfo.size(); i++)
+    {
+        m_vecQunerHttPtr.push_back(new QunerHttp(m_vecChannelInfo[i].strAccount, m_vecChannelInfo[i].strPassword, m_vecChannelInfo[i].strChannelName, this));
+    }
     pNetworkReply->deleteLater();
 
 }
@@ -1197,9 +1223,25 @@ void MainWindow::replyLoadChannelRelation()
     pNetworkReply->deleteLater();
 }
 
-void MainWindow::updateChannelList()
+void MainWindow::updateTicketUI()
 {
-    qDebug() << "updateChannelList";
+    for(int i=0; i<m_vecTicketInfo.size(); i++)
+    {
+        addItemToTicketList(m_vecTicketInfo[i]);
+    }
+}
+
+void MainWindow::updatePickServiceUI()
+{
+    for(int i=0; i<m_vecPickServiceInfo.size(); i++)
+    {
+        addItemToServiceList(m_vecPickServiceInfo[i]);
+    }
+}
+
+void MainWindow::updateChannelListUI()
+{
+    qDebug() << "updateChannelListUI";
     int row = ui->tableWidget_Channel->rowCount();
     for(int i=0; i<row; i++)
     {
@@ -1400,7 +1442,7 @@ void MainWindow::on_pushButton_ChannelUpdate_clicked()
         }
     }
     updateChannel(tmpChannelInfo);
-    updateChannelList();
+    updateChannelListUI();
 }
 
 void MainWindow::on_pushButton_ChannelDel_clicked()
@@ -1421,7 +1463,7 @@ void MainWindow::on_pushButton_ChannelDel_clicked()
         }
     }
     deleteChannel(strChannelName);
-    updateChannelList();
+    updateChannelListUI();
     ui->lineEdit_ChannelName->setText("");
     ui->lineEdit_Account->setText("");
     ui->lineEdit_Password->setText("");
@@ -1442,6 +1484,29 @@ void MainWindow::channelCurrentItemClicked(QTableWidgetItem *tableWidgetItem)
         ui->lineEdit_ChannelName->setText(m_vecChannelInfo[currentRow].strChannelName);
         ui->lineEdit_Account->setText(m_vecChannelInfo[currentRow].strAccount);
         ui->lineEdit_Password->setText(m_vecChannelInfo[currentRow].strPassword);
+    }
+}
+
+void MainWindow::channelRelationCurrentItemClicked(QTableWidgetItem *tableWidgetItem)
+{
+    QString strChannelName = "";
+    if(ui->listWidget_ChannelList->currentItem())
+    {
+        strChannelName = ui->listWidget_ChannelList->currentItem()->text();
+    }
+    if(strChannelName == "")
+    {
+        QMessageBox::information(NULL, QString("提醒"), QString("请关联一个渠道!"));
+        return;
+    }
+
+    int currentRow = ui->tableWidget_ChannelRelation->row(tableWidgetItem);
+    QVector<ChannelRelationInfo> vecChannelRealationInfo = m_mapChannelRelationInfo[strChannelName];
+    if(currentRow < vecChannelRealationInfo.size())
+    {
+        ui->lineEdit_ChannelPickServiceID->setText(vecChannelRealationInfo[currentRow].strPickServiceId);
+        ui->lineEdit_ShopProductID->setText(vecChannelRealationInfo[currentRow].strShopProductId);
+        ui->lineEdit_ShopProductName->setText(vecChannelRealationInfo[currentRow].strShopProductName);
     }
 }
 
@@ -1626,4 +1691,135 @@ void MainWindow::clearChannelRelationDetailUI()
     ui->lineEdit_ChannelPickServiceID->clear();
     ui->lineEdit_ShopProductID->clear();
     ui->lineEdit_ShopProductName->clear();
+}
+
+void MainWindow::update2Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pickServiceInfo)
+{
+    QVector<QunarPriceInfo> vecQunerPriceInfo;
+    for(QMap<QString, QMap<QString, TicketPriceInfo> >::iterator iterMapTicketPriceInfo = ticketInfo.mapTicketPriceInfo.begin();
+        iterMapTicketPriceInfo!=ticketInfo.mapTicketPriceInfo.end(); iterMapTicketPriceInfo++)
+    {
+        QString strYearMonth = iterMapTicketPriceInfo.key();
+        if(strYearMonth.size() >= 4)
+        {
+            int nYear = strYearMonth.left(4).toInt();
+            int nMonth = strYearMonth.remove(0, 4).toInt();
+            if(nYear>2015 && nYear<=2020 && nMonth>0 && nMonth<=12)
+            {
+                QMap<QString, TicketPriceInfo> &tmpTicketPriceInfo = iterMapTicketPriceInfo.value();
+                for(QMap<QString, TicketPriceInfo>::iterator iterTmpTicketPriceInfo=tmpTicketPriceInfo.begin();
+                    iterTmpTicketPriceInfo!=tmpTicketPriceInfo.end(); iterTmpTicketPriceInfo++)
+                {
+                    if(iterTmpTicketPriceInfo.value().bUpdate == true)
+                    {
+                        QString strDay = iterTmpTicketPriceInfo.key();
+                        int nDay = strDay.toInt();
+                        if(nDay>0 && nDay <=12)
+                        {
+                            QDate tmpDay = QDate(nYear, nMonth, nDay);
+                            QunarPriceInfo tmpQunarPriceInfo;
+                            tmpQunarPriceInfo.dateString = tmpDay.toString("yy-MM-dd");
+                            tmpQunarPriceInfo.adult_price = ticketInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketAdultPrice + pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketAdultPrice;
+                            tmpQunarPriceInfo.child_price = ticketInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketChildPrice + pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketChildPrice;
+                            tmpQunarPriceInfo.count = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketStock;
+                            tmpQunarPriceInfo.market_price = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketRetailPrice;
+                            tmpQunarPriceInfo.max_buy_count = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nMaxPerOrder;
+                            tmpQunarPriceInfo.min_buy_count = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nMinPerOrder;
+                            tmpQunarPriceInfo.room_send_price = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nSigleRoomSpread;
+                            vecQunerPriceInfo.push_back(tmpQunarPriceInfo);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for(QMap<QString, QMap<QString, TicketPriceInfo> >::iterator iterMapPickServicePriceInfo = pickServiceInfo.mapTicketPriceInfo.begin();
+        iterMapPickServicePriceInfo!=pickServiceInfo.mapTicketPriceInfo.end(); iterMapPickServicePriceInfo++)
+    {
+        QString strYearMonth = iterMapPickServicePriceInfo.key();
+        if(strYearMonth.size() >= 4)
+        {
+            int nYear = strYearMonth.left(4).toInt();
+            int nMonth = strYearMonth.remove(0, 4).toInt();
+            if(nYear>2015 && nYear<=2020 && nMonth>0 && nMonth<=12)
+            {
+                QMap<QString, TicketPriceInfo> &tmpPickServicePriceInfo = iterMapPickServicePriceInfo.value();
+                for(QMap<QString, TicketPriceInfo>::iterator iterTmpPickServicePriceInfo=tmpPickServicePriceInfo.begin();
+                    iterTmpPickServicePriceInfo!=tmpPickServicePriceInfo.end(); iterTmpPickServicePriceInfo++)
+                {
+                    if(iterTmpPickServicePriceInfo.value().bUpdate == true)
+                    {
+                        QString strDay = iterTmpPickServicePriceInfo.key();
+                        int nDay = strDay.toInt();
+                        if(nDay>0 && nDay <=12)
+                        {
+                            QDate tmpDay = QDate(nYear, nMonth, nDay);
+                            QunarPriceInfo tmpQunarPriceInfo;
+                            tmpQunarPriceInfo.dateString = tmpDay.toString("yy-MM-dd");
+                            tmpQunarPriceInfo.adult_price = ticketInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketAdultPrice + pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketAdultPrice;
+                            tmpQunarPriceInfo.child_price = ticketInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketChildPrice + pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketChildPrice;
+                            tmpQunarPriceInfo.count = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketStock;
+                            tmpQunarPriceInfo.market_price = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketRetailPrice;
+                            tmpQunarPriceInfo.max_buy_count = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nMaxPerOrder;
+                            tmpQunarPriceInfo.min_buy_count = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nMinPerOrder;
+                            tmpQunarPriceInfo.room_send_price = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nSigleRoomSpread;
+                            vecQunerPriceInfo.push_back(tmpQunarPriceInfo);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    QMap<QString, QVector<ChannelRelationInfo> > mapChannelRelationInfoTmp;
+    for(QMap<QString, QVector<ChannelRelationInfo> >::iterator iterMapChannelRelationInfo = m_mapChannelRelationInfo.begin();
+        iterMapChannelRelationInfo!=m_mapChannelRelationInfo.end(); iterMapChannelRelationInfo++)
+    {
+        QVector<ChannelRelationInfo> vecTmpChannelRelationInfo;
+        for(QVector<ChannelRelationInfo>::iterator iterVecChannelRelationInfo = iterMapChannelRelationInfo.value().begin();
+            iterVecChannelRelationInfo != iterMapChannelRelationInfo.value().end(); iterVecChannelRelationInfo++)
+        {
+            if(iterVecChannelRelationInfo->strPickServiceId == pickServiceInfo.strNo)
+            {
+                vecTmpChannelRelationInfo.push_back(*iterVecChannelRelationInfo);
+            }
+        }
+        if(vecTmpChannelRelationInfo.size() != 0)
+        {
+            mapChannelRelationInfoTmp[iterMapChannelRelationInfo.key()] = vecTmpChannelRelationInfo;
+        }
+    }
+
+    for(QMap<QString, QVector<ChannelRelationInfo> >::iterator iterTmp = mapChannelRelationInfoTmp.begin();
+        iterTmp!=mapChannelRelationInfoTmp.end(); iterTmp++)
+    {
+        for(int i=0; i<m_vecChannelInfo.size(); i++)
+        {
+            //找到渠道名，找到HTTP对象进行登录
+            if(m_vecChannelInfo[i].strChannelName == iterTmp.key())
+            {
+                for(int indexHttp=0; indexHttp!=m_vecQunerHttPtr.size(); indexHttp++)
+                {
+                    if(m_vecQunerHttPtr[indexHttp]->GetUserName() == m_vecChannelInfo[i].strAccount
+                    && m_vecQunerHttPtr[indexHttp]->GetChannelName() == m_vecChannelInfo[i].strChannelName)
+                    {
+                        QVector<QunarPriceInfo> vecUpdatePriceInfo;
+                        QVector<QunarPriceInfo> vecQunerPriceInfoTmp = vecQunerPriceInfo;
+                        QVector<ChannelRelationInfo> vecTmpChannelRelationInfo = iterTmp.value();
+                        for(int i=0; i<vecTmpChannelRelationInfo.size(); i++)
+                        {
+                            for(int index=0; index<vecQunerPriceInfoTmp.size(); index++)
+                            {
+                                vecQunerPriceInfoTmp[i].pId = vecTmpChannelRelationInfo[i].strShopProductId;
+                                vecUpdatePriceInfo.push_back(vecQunerPriceInfoTmp[i]);
+                            }
+                        }
+                        m_vecQunerHttPtr[indexHttp]->setQunarPrice4Update(vecUpdatePriceInfo);
+                        m_vecQunerHttPtr[indexHttp]->login();
+                    }
+                }
+            }
+        }
+    }
 }

@@ -165,6 +165,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonDelete">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>删除机票信息</string>
             </property>
@@ -335,6 +338,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="pushButton_ServiceDelete">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>删除</string>
             </property>

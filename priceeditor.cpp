@@ -332,6 +332,11 @@ void PriceEditor::getPriceInfo(QMap<QString, QMap<QString, TicketPriceInfo> >&ma
     ui->widgetCalendar->getPriceInfo(mapTicketPriceInfo);
 }
 
+void PriceEditor::clearUpdateFlag()
+{
+    ui->widgetCalendar->clearUpdateFlag();
+}
+
 Calendar* PriceEditor::getCalendar()
 {
     return ui->widgetCalendar;

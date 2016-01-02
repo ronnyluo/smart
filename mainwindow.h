@@ -64,6 +64,7 @@ private slots:
     void on_pushButton_ChannelDel_clicked();
     void on_pushButton_ChannelCancel_clicked();
     void channelCurrentItemClicked(QTableWidgetItem *tableWidgetItem);
+    void channelRelationCurrentItemClicked(QTableWidgetItem *tableWidgetItem);
 
     void tabWidgetCurrentChanged(int index);
     void channelListCurrentItemChanged(QListWidgetItem *currentItem, QListWidgetItem *);
@@ -96,8 +97,14 @@ private:
     void deleteChannel(const QString & strChannelName);
     void deleteChannelRelation(const QString & strChannelName, const QString & strProductId);
 
+    //机票信息UI
+    void updateTicketUI();
+
+    //地接信息UI
+    void updatePickServiceUI();
+
     //渠道管理
-    void updateChannelList();
+    void updateChannelListUI();
 
     //渠道关联
     void updateChannelRelationUI();
@@ -108,6 +115,9 @@ private:
 
     void initUI();
     void getAnswer(QString& jsFunc, QString& answer, QString& cookie);
+
+    //更新数据到去哪儿网
+    void update2Qunaer(TicketInfo& ticketInfo, PickServiceInfo &pickServiceInfo);
 
 private:
     Ui::MainWindow *ui;
