@@ -332,15 +332,19 @@ void Calendar::updateMaxPerOrder(QString strDay, int nMaxPerOrder)
 void Calendar::clearUpdateFlag()
 {
     for(QMap<QString, QMap<QString, TicketPriceInfo> >::iterator iterMultiMap = m_mapTicketPriceInfo.begin();
-        iterMultiMap!=m_mapHelpPriceInfo.end(); iterMultiMap++)
+        iterMultiMap!=m_mapTicketPriceInfo.end(); iterMultiMap++)
     {
-        QMap<QString, TicketPriceInfo> &mapTmpTicketPriceInfo = m_mapTicketPriceInfo[iterMultiMap.key()];
-        for(QMap<QString, TicketPriceInfo>::iterator iterMap = mapTmpTicketPriceInfo.begin();
-            iterMap!=mapTmpTicketPriceInfo.end(); iterMap++)
+        QString strKey = iterMultiMap.key();
+        if(strKey != "")
         {
-            if(iterMap.value().bUpdate == true)
+            QMap<QString, TicketPriceInfo> &mapTmpTicketPriceInfo = m_mapTicketPriceInfo[iterMultiMap.key()];
+            for(QMap<QString, TicketPriceInfo>::iterator iterMap = mapTmpTicketPriceInfo.begin();
+                iterMap!=mapTmpTicketPriceInfo.end(); iterMap++)
             {
-                iterMap.value().bUpdate = false;
+                if(iterMap.value().bUpdate == true)
+                {
+                    iterMap.value().bUpdate = false;
+                }
             }
         }
     }

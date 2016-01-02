@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lineEdit_ServiceDestination->installEventFilter(this);
     ui->lineEdit_ServiceDays->installEventFilter(this);
     ui->lineEdit_ServiceDays->setValidator(new QIntValidator(1, 1000, ui->lineEdit_ServiceDays));
-    ui->lineEdit_ServiceName->setReadOnly(true);
+    //ui->lineEdit_ServiceName->setReadOnly(true);
     ui->lineEdit_ServiceNo->setReadOnly(true);
 
     connect(ui->listWidget_Service, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), this, SLOT(serviceCurrentItemChanged(QListWidgetItem *, QListWidgetItem *)));
@@ -174,9 +174,9 @@ void MainWindow::serviceInfoChanged()
     qDebug() << "Departure:" << strDeparture;
     qDebug() << "Destination:" << strDestination;
     qDebug() << "Days:" << strDays;
-    QString strServiceName = strDeparture + strDestination + strDays + "天往返";
-    qDebug() << strServiceName;
-    ui->lineEdit_ServiceName->setText(strServiceName);
+    //QString strServiceName = strDeparture + strDestination + strDays + "天往返";
+    //qDebug() << strServiceName;
+    //ui->lineEdit_ServiceName->setText(strServiceName);
 }
 
 void MainWindow::findTicketInfoChanged(QString strFindName)
