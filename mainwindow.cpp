@@ -1753,7 +1753,7 @@ void MainWindow::update2Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pickServ
                     {
                         QString strDay = iterTmpPickServicePriceInfo.key();
                         int nDay = strDay.toInt();
-                        if(nDay>0 && nDay <=12)
+                        if(nDay>0 && nDay <=31)
                         {
                             QDate tmpDay = QDate(nYear, nMonth, nDay);
                             QunarPriceInfo tmpQunarPriceInfo;
@@ -1812,11 +1812,13 @@ void MainWindow::update2Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pickServ
                         {
                             for(int index=0; index<vecQunerPriceInfoTmp.size(); index++)
                             {
-                                vecQunerPriceInfoTmp[i].pId = vecTmpChannelRelationInfo[i].strShopProductId;
-                                vecUpdatePriceInfo.push_back(vecQunerPriceInfoTmp[i]);
+                                vecQunerPriceInfoTmp[index].pId = vecTmpChannelRelationInfo[i].strShopProductId;
+                                vecUpdatePriceInfo.push_back(vecQunerPriceInfoTmp[index]);
                             }
                         }
                         m_vecQunerHttPtr[indexHttp]->setQunarPrice4Update(vecUpdatePriceInfo);
+                        qDebug() << "帐号：" << m_vecQunerHttPtr[indexHttp]->GetUserName()
+                                 << " 密码：" << m_vecQunerHttPtr[indexHttp]->GetChannelName() << endl;
                         m_vecQunerHttPtr[indexHttp]->login();
                     }
                 }

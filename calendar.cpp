@@ -282,50 +282,78 @@ TicketPriceInfo Calendar::getHelpPriceInfo(QString strDay)
 
 void Calendar::updateTicketAdultPrice(QString strDay, int nAdultPrice)
 {
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketAdultPrice = nAdultPrice;
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    if(m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketAdultPrice != nAdultPrice)
+    {
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketAdultPrice = nAdultPrice;
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    }
+
     emit updatePriceInfoSignal(m_mapTicketPriceInfo);
 }
 
 void Calendar::updateTicketChildPrice(QString strDay, int nChildPrice)
 {
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketChildPrice = nChildPrice;
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    if(m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketChildPrice != nChildPrice)
+    {
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketChildPrice = nChildPrice;
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    }
+
     emit updatePriceInfoSignal(m_mapTicketPriceInfo);
 }
 
 void Calendar::updateSingleRoomPrice(QString strDay, int nSingleRoomPrice)
 {
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nSigleRoomSpread = nSingleRoomPrice;
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    if(m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nSigleRoomSpread != nSingleRoomPrice)
+    {
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nSigleRoomSpread = nSingleRoomPrice;
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    }
+
     emit updatePriceInfoSignal(m_mapTicketPriceInfo);
 }
 
 void Calendar::updateRetailPrice(QString strDay, int nRetailPrice)
 {
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketRetailPrice = nRetailPrice;
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    if(m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketRetailPrice != nRetailPrice)
+    {
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketRetailPrice = nRetailPrice;
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    }
+
     emit updatePriceInfoSignal(m_mapTicketPriceInfo);
 }
 
 void Calendar::updateStock(QString strDay, int nStock)
 {
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketStock = nStock;
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    if(m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketStock != nStock)
+    {
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nTicketStock = nStock;
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    }
+
     emit updatePriceInfoSignal(m_mapTicketPriceInfo);
 }
 
 void Calendar::updateMinPerOrder(QString strDay, int nMinPerOrder)
 {
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nMinPerOrder = nMinPerOrder;
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    if(m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nMinPerOrder != nMinPerOrder)
+    {
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nMinPerOrder = nMinPerOrder;
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    }
+
     emit updatePriceInfoSignal(m_mapTicketPriceInfo);
 }
 
 void Calendar::updateMaxPerOrder(QString strDay, int nMaxPerOrder)
 {
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nMaxPerOrder = nMaxPerOrder;
-    m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    if(m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nMaxPerOrder != nMaxPerOrder)
+    {
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].nMaxPerOrder = nMaxPerOrder;
+        m_mapTicketPriceInfo[QString::number(m_nYear)+QString::number(m_nMonth)][strDay].bUpdate = true;
+    }
+
     emit updatePriceInfoSignal(m_mapTicketPriceInfo);
 }
 

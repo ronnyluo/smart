@@ -801,11 +801,11 @@ void QunerHttp::replySetQunarPrice()
         qDebug() << "SetQunarPrice statue=" << status.toInt() << ",content=" << QString(bytes) << endl;
         QJsonDocument document = QJsonDocument::fromJson(bytes);
         QJsonObject object = document.object();
-        if (object["ret"].toInt() <= 0)
+        if (object["ret"].toInt() <= 0 || !object["message"].toString().contains("成功"))
         {
             qDebug() << "errmsg=" << object["message"].toString() << endl;
             //处理错误
-            QMessageBox::information(NULL, QString("更新价格异常"), object["message"].toString());
+            QMessageBox::information(NULL, QString("更新去哪儿网价格异常"), object["message"].toString());
 
         }
         m_stream << "setQunarPrice=" << QString(bytes) << endl;
