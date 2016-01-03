@@ -174,6 +174,7 @@ void QunerHttp::replyLogin()
         else
         {
             updateQunarPrice(m_vecQunerPriceInfo);
+            m_vecQunerPriceInfo.clear();
         }
     }
     else
