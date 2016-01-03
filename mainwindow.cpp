@@ -221,7 +221,8 @@ void MainWindow::findServiceInfoChanged(QString strFindName)
     QVector<PickServiceInfo> vecFindPickServiceInfo;
     for(int i=0; i<m_vecPickServiceInfo.size(); i++)
     {
-        if(m_vecPickServiceInfo[i].strName.contains(strFindName))
+        if(m_vecPickServiceInfo[i].strName.contains(strFindName, Qt::CaseInsensitive)
+                || m_vecPickServiceInfo[i].strMissionNo.contains(strFindName, Qt::CaseInsensitive))
         {
             vecFindPickServiceInfo.push_back(m_vecPickServiceInfo[i]);
         }
