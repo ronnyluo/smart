@@ -1783,7 +1783,7 @@ void MainWindow::update2Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pickServ
         for(QVector<ChannelRelationInfo>::iterator iterVecChannelRelationInfo = iterMapChannelRelationInfo.value().begin();
             iterVecChannelRelationInfo != iterMapChannelRelationInfo.value().end(); iterVecChannelRelationInfo++)
         {
-            if(iterVecChannelRelationInfo->strPickServiceId == pickServiceInfo.strNo)
+            if(iterVecChannelRelationInfo->strPickServiceId.simplified() == pickServiceInfo.strNo.simplified())
             {
                 vecTmpChannelRelationInfo.push_back(*iterVecChannelRelationInfo);
             }
