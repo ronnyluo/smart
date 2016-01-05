@@ -122,23 +122,32 @@ void PriceEditor::calendarItemCheckSlot(CalendarItem* item, bool bCheck)
                     }
                 }
             }
+            showPriceOnRightUI(item);
         }
-
-        showPriceOnRightUI(item);
     }
 
     if(SELECTMODE_MULTI == ui->widgetCalendar->getSelectMode())
     {
+        int iCheckNum = 0;
+        CalendarItem* pCheckItem;
         for(int j=0; j<7; j++)
         {
             if(ui->widgetCalendar->m_pCalendarItemArray[0][j] == item)
             {
                 for(int i=1; i<7; i++)
                 {
-                    ui->widgetCalendar->m_pCalendarItemArray[i][j]->setCheck(bCheck);
-                    showPriceOnRightUI(ui->widgetCalendar->m_pCalendarItemArray[i][j]);
+                    if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked())
+                    {
+                        iCheckNum ++;
+                        pCheckItem = ui->widgetCalendar->m_pCalendarItemArray[i][j];
+                    }
                 }
             }
+        }
+
+        if(iCheckNum == 1)
+        {
+            showPriceOnRightUI(pCheckItem);
         }
     }
 }
