@@ -82,6 +82,7 @@ public:
     void setPassword(const QString & sPassword);
 
     void updateQunarPrice(QVector<QunarPriceInfo>& vecQunerPriceInfo);
+    void updateQunarPriceBatch(QVector<QunarPriceInfoBatch>& vecQunerPriceInfoBatch);
     void login();
     void setQunarPrice4Update(QVector<QunarPriceInfo>& vecQunerPriceInfo);
 

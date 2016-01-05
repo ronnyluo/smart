@@ -735,6 +735,15 @@ void QunerHttp::setQunarPrice4Update(QVector<QunarPriceInfo> &vecQunerPriceInfo)
     m_vecQunerPriceInfo = vecQunerPriceInfo;
 }
 
+
+void QunerHttp::updateQunarPriceBatch(QVector<QunarPriceInfoBatch>& vecQunerPriceInfoBatch)
+{
+     for (int i = 0; i < vecQunerPriceInfoBatch.size(); i++)
+    {
+        setQunarPrice(vecQunerPriceInfoBatch[i].toPostForm().toUtf8());
+    }
+}
+
 void QunerHttp::updateQunarPrice(QVector<QunarPriceInfo>& vecQunerPriceInfo)
 {
     for (int i = 0; i < vecQunerPriceInfo.size(); i++)

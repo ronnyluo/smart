@@ -6,6 +6,7 @@
 #include <QJsonObject>
 #include <QTextCodec>
 #include <QtGlobal>
+#include <QVector>
 
 //调试时使用
 //const QString QSS_CONFIG_FILE_PATH = "../smart/stylesheet.txt";
@@ -370,6 +371,58 @@ typedef struct tagQunarPriceInfo
                 max_buy_count;
     }
 }QunarPriceInfo;
+
+typedef struct tagQunarPriceInfoBatch
+{		/*
+        market_price:6520
+        adult_price:4260
+        room_send_price:1860
+        room_type:2
+        count:20
+        min_buy_count:1
+        max_buy_count:10
+        profit:0
+        price_desc:
+        dateString:2015-12-27
+        pId:2533826371
+        is_child_price:on
+        child_price:2700
+        child_price_desc:
+        is_taocan:off
+        */
+    QString market_price; //门市价
+    QString adult_price;  //成人价
+    QString room_send_price; //单房差
+    QString count; //库存
+    QVector<QString> vecDateString; //日期
+    QString pId; //产品id
+    QString child_price; //儿童价
+    QString min_buy_count; //每单至少人数
+    QString max_buy_count; //每单至多人数
+
+    QString toPostForm()
+    {
+        QString dateString;
+        for (int i = 0; i < vecDateString.size(); i++)
+        {
+            if (dateString.isEmpty())
+            {
+                dateString.append(vecDateString[i]);
+            }
+            else
+            {
+
+                dateString.append(",").append(vecDateString[i]);
+            }
+        }
+        return "market_price=" + market_price + "&adult_price=" +
+                adult_price + "&room_send_price=" + room_send_price +
+                "&count=" + count + "&dateString=" + dateString +
+                "&pId=" + pId + "&child_price=" + child_price +
+                "&min_buy_count=" + min_buy_count + "&max_buy_count=" +
+                max_buy_count;
+    }
+}QunarPriceInfoBatch;
 
 QString getRandomDigit(int iNum);
 QString getMidStr(QString & origin, const QString & first, const QString & last);
