@@ -129,23 +129,28 @@ void PriceEditor::calendarItemCheckSlot(CalendarItem* item, bool bCheck)
     if(SELECTMODE_MULTI == ui->widgetCalendar->getSelectMode())
     {
         int iCheckNum = 0;
-        CalendarItem* pCheckItem;
+        CalendarItem* pCheckItem = NULL;
         for(int j=0; j<7; j++)
         {
             if(ui->widgetCalendar->m_pCalendarItemArray[0][j] == item)
             {
                 for(int i=1; i<7; i++)
                 {
-                    if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked())
-                    {
-                        iCheckNum ++;
-                        pCheckItem = ui->widgetCalendar->m_pCalendarItemArray[i][j];
-                    }
+                    ui->widgetCalendar->m_pCalendarItemArray[i][j]->setCheck(bCheck);
+                }
+            }
+
+            for(int i=1; i<7; i++)
+            {
+                if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText()!="" && ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked())
+                {
+                    iCheckNum ++;
+                    pCheckItem = ui->widgetCalendar->m_pCalendarItemArray[i][j];
                 }
             }
         }
 
-        if(iCheckNum == 1)
+        if(iCheckNum == 1 && pCheckItem != NULL)
         {
             showPriceOnRightUI(pCheckItem);
         }

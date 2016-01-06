@@ -61,6 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->lineEdit_ServiceDestination, SIGNAL(textChanged(QString)), this, SLOT(serviceInfoChanged()));
     connect(ui->lineEdit_ServiceDays, SIGNAL(textChanged(QString)), this, SLOT(serviceInfoChanged()));
     connect(ui->lineEdit_ServiceFind, SIGNAL(textChanged(QString)), this, SLOT(findServiceInfoChanged(QString)));
+    connect(ui->lineEdit_ChannelServiceSearch, SIGNAL(textChanged(QString)), this, SLOT(findChannelServiceChanged(QString)));
     m_pPickServicePriceEditor = new PriceEditor(this, PRICE_EDITOR_PICK_SERVICE);
     m_pPickServicePriceEditor->hide();
     connect(m_pPickServicePriceEditor->getCalendar(), SIGNAL(updatePriceInfoSignal(QMap<QString, QMap<QString, TicketPriceInfo> >&)), this, SLOT(updateServicePriceInfoSlot(QMap<QString, QMap<QString, TicketPriceInfo> >&)));
@@ -71,6 +72,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->listWidget_ChannelList, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), this, SLOT(channelListCurrentItemChanged(QListWidgetItem *, QListWidgetItem *)));
 
     connect(ui->tableWidget_ChannelRelation, SIGNAL(itemClicked(QTableWidgetItem *)), this, SLOT(channelRelationCurrentItemClicked(QTableWidgetItem *)));
+
+    connect(ui->tableWidget_ChannelServiceList, SIGNAL(itemClicked(QTableWidgetItem *)), this, SLOT(channelServiceListCurrentItemClicked(QTableWidgetItem *)));
 
     //渠道暂时不需要搜索功能
     ui->label_ChannelFind->hide();
@@ -251,6 +254,24 @@ void MainWindow::findServiceInfoChanged(QString strFindName)
         addItemToServiceList(vecFindPickServiceInfo[i]);
     }
     qDebug() << "before add" << ui->listWidget_Service->count();
+}
+
+void MainWindow::findChannelServiceChanged(QString strFindName)
+{
+    QVector<PickServiceInfo> vecFindPickServiceInfo;
+    for(int i=0; i<m_vecPickServiceInfo.size(); i++)
+    {
+        if(m_vecPickServiceInfo[i].strName.contains(strFindName, Qt::CaseInsensitive)
+                || m_vecPickServiceInfo[i].strMissionNo.contains(strFindName, Qt::CaseInsensitive)
+                || m_vecPickServiceInfo[i].strNo.contains(strFindName, Qt::CaseInsensitive))
+        {
+            vecFindPickServiceInfo.push_back(m_vecPickServiceInfo[i]);
+        }
+    }
+    qDebug() << vecFindPickServiceInfo.size();
+
+    //删除所有的Item
+    addItemToChannelServiceList(vecFindPickServiceInfo);
 }
 
 void MainWindow::on_pushButtonUpdate_clicked()
@@ -1512,6 +1533,15 @@ void MainWindow::channelRelationCurrentItemClicked(QTableWidgetItem *tableWidget
     }
 }
 
+void MainWindow::channelServiceListCurrentItemClicked(QTableWidgetItem *tableWidgetItem)
+{
+    int currentRow = ui->tableWidget_ChannelServiceList->row(tableWidgetItem);
+    QString strServiceNo = ui->tableWidget_ChannelServiceList->item(currentRow, 0)->text();
+    ui->lineEdit_ChannelPickServiceID->setText(strServiceNo);
+    ui->lineEdit_ShopProductID->setText("");
+    ui->lineEdit_ShopProductName->setText("");
+}
+
 void MainWindow::updateChannelRelationUI()
 {
     disconnect(ui->listWidget_ChannelList, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), 0, 0);
@@ -1541,6 +1571,43 @@ void MainWindow::updateChannelRelationUI()
         ui->listWidget_ChannelList->setCurrentItem(item);
     }
     connect(ui->listWidget_ChannelList, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), this, SLOT(channelListCurrentItemChanged(QListWidgetItem *, QListWidgetItem *)));
+
+    addItemToChannelServiceList(m_vecPickServiceInfo);
+}
+
+void MainWindow::addItemToChannelServiceList(QVector<PickServiceInfo> &vecPickServiceInfo)
+{
+    //渠道关联中的地接列表
+    disconnect(ui->tableWidget_ChannelServiceList, SIGNAL(itemClicked(QTableWidgetItem *)), 0, 0);
+    int row = ui->tableWidget_ChannelServiceList->rowCount();
+    for(int i=0; i<row; i++)
+    {
+        ui->tableWidget_ChannelServiceList->removeRow(0);
+    }
+
+    ui->tableWidget_ChannelServiceList->setColumnCount(3);
+    ui->tableWidget_ChannelServiceList->setRowCount(m_vecPickServiceInfo.size());
+    ui->tableWidget_ChannelServiceList->verticalHeader()->setVisible(false);
+    QStringList header;
+    header << "地接产品ID" << "地接产品名称" << "团号";
+    ui->tableWidget_ChannelServiceList->setHorizontalHeaderLabels(header);
+    ui->tableWidget_ChannelServiceList->horizontalHeader()->resizeSections(QHeaderView::Stretch);
+
+    connect(ui->tableWidget_ChannelServiceList, SIGNAL(itemClicked(QTableWidgetItem *)), this, SLOT(channelServiceListCurrentItemClicked(QTableWidgetItem *)));
+    for(int i=0; i<vecPickServiceInfo.size(); i++)
+    {
+        QTableWidgetItem *itemPickServiceID = new QTableWidgetItem(vecPickServiceInfo[i].strNo);
+        itemPickServiceID->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ChannelServiceList->setItem(i, 0, itemPickServiceID);
+
+        QTableWidgetItem *itemPickServiceName = new QTableWidgetItem(vecPickServiceInfo[i].strName);
+        itemPickServiceName->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ChannelServiceList->setItem(i, 1, itemPickServiceName);
+
+        QTableWidgetItem *itemPickServiceMissionNo = new QTableWidgetItem(vecPickServiceInfo[i].strMissionNo);
+        itemPickServiceMissionNo->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ChannelServiceList->setItem(i, 2, itemPickServiceMissionNo);
+    }
 }
 
 void MainWindow::updateChannelRelationDetailUI(QString strChannelName)

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>622</width>
+    <height>424</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -537,123 +537,178 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_2">
+      <widget class="QWidget" name="tab_ChannelRelation">
        <attribute name="title">
         <string>渠道关联</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_10">
+       <layout class="QVBoxLayout" name="verticalLayout_5">
         <item>
-         <widget class="QListWidget" name="listWidget_ChannelList">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="Line" name="line_5">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
           <item>
-           <layout class="QGridLayout" name="gridLayout_4">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_18">
-              <property name="text">
-               <string>地接产品ID:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="lineEdit_ChannelPickServiceID"/>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_21">
-              <property name="text">
-               <string>关联产品ID：</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QLineEdit" name="lineEdit_ShopProductID"/>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_22">
-              <property name="text">
-               <string>关联产品名称：</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QLineEdit" name="lineEdit_ShopProductName"/>
-            </item>
-           </layout>
+           <widget class="QListWidget" name="listWidget_ChannelList">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <widget class="Line" name="line_5">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
             <item>
-             <spacer name="horizontalSpacer_7">
+             <layout class="QGridLayout" name="gridLayout_4">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_18">
+                <property name="text">
+                 <string>地接产品ID:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="lineEdit_ChannelPickServiceID"/>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_21">
+                <property name="text">
+                 <string>关联产品ID：</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="lineEdit_ShopProductID"/>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_22">
+                <property name="text">
+                 <string>关联产品名称：</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="lineEdit_ShopProductName"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <item>
+               <spacer name="horizontalSpacer_7">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_ChannelRelationUpdate">
+                <property name="text">
+                 <string>更新</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_ChannelRelationDel">
+                <property name="text">
+                 <string>删除</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButton_ChannelRelationCancel">
+                <property name="text">
+                 <string>取消</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="Line" name="line_4">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton_ChannelRelationUpdate">
-              <property name="text">
-               <string>更新</string>
-              </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_ChannelRelationDel">
-              <property name="text">
-               <string>删除</string>
+             <widget class="QTableWidget" name="tableWidget_ChannelRelation">
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
               </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton_ChannelRelationCancel">
-              <property name="text">
-               <string>取消</string>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::ExtendedSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
               </property>
              </widget>
             </item>
            </layout>
           </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_11">
           <item>
-           <widget class="Line" name="line_4">
+           <widget class="QLabel" name="label_24">
+            <property name="text">
+             <string>地接产品列表：</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_8">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_25">
+            <property name="text">
+             <string>搜索：</string>
+            </property>
            </widget>
           </item>
           <item>
-           <widget class="QTableWidget" name="tableWidget_ChannelRelation">
-            <property name="editTriggers">
-             <set>QAbstractItemView::NoEditTriggers</set>
-            </property>
-            <property name="selectionMode">
-             <enum>QAbstractItemView::ExtendedSelection</enum>
-            </property>
-            <property name="selectionBehavior">
-             <enum>QAbstractItemView::SelectRows</enum>
-            </property>
-           </widget>
+           <widget class="QLineEdit" name="lineEdit_ChannelServiceSearch"/>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableWidget_ChannelServiceList">
+          <property name="selectionMode">
+           <enum>QAbstractItemView::ExtendedSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -666,7 +721,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>600</width>
+     <width>622</width>
      <height>23</height>
     </rect>
    </property>

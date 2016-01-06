@@ -65,6 +65,8 @@ private slots:
     void on_pushButton_ChannelCancel_clicked();
     void channelCurrentItemClicked(QTableWidgetItem *tableWidgetItem);
     void channelRelationCurrentItemClicked(QTableWidgetItem *tableWidgetItem);
+    void channelServiceListCurrentItemClicked(QTableWidgetItem *tableWidgetItem);
+    void findChannelServiceChanged(QString strFindName);
 
     void tabWidgetCurrentChanged(int index);
     void channelListCurrentItemChanged(QListWidgetItem *currentItem, QListWidgetItem *);
@@ -83,6 +85,8 @@ private:
     void addItemToServiceList(PickServiceInfo& serviceInfo);
     void clearServiceUI();
     void updateServiceUI(PickServiceInfo& serviceInfo);
+
+    void addItemToChannelServiceList(QVector<PickServiceInfo> &vecPickServiceInfo);
 
     void updateTicket(const TicketInfo & ticketInfo);
     void updatePickService(const PickServiceInfo & pickServiceInfo);
