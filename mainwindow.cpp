@@ -636,7 +636,8 @@ void MainWindow::on_pushButton_ServiceUpdate_clicked()
     fillPickServiceInfo(tmpPickServiceInfo);
     if(NULL==tmpPickServiceInfo.strDeparture
       || NULL == tmpPickServiceInfo.strDestination
-      || NULL == tmpPickServiceInfo.strDays)
+      || NULL == tmpPickServiceInfo.strDays
+      || NULL == tmpPickServiceInfo.strName)
     {
         QMessageBox::information(NULL, QString("提醒"), QString("请输入完整的地接服务信息!"));
         return;
@@ -1539,7 +1540,8 @@ void MainWindow::channelServiceListCurrentItemClicked(QTableWidgetItem *tableWid
     QString strServiceNo = ui->tableWidget_ChannelServiceList->item(currentRow, 0)->text();
     ui->lineEdit_ChannelPickServiceID->setText(strServiceNo);
     ui->lineEdit_ShopProductID->setText("");
-    ui->lineEdit_ShopProductName->setText("");
+    QString strServiceName = ui->tableWidget_ChannelServiceList->item(currentRow, 1)->text();
+    ui->lineEdit_ShopProductName->setText(strServiceName);
 }
 
 void MainWindow::updateChannelRelationUI()
