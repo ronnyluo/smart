@@ -769,7 +769,6 @@ void QunerHttp::updateQunarPrice(QVector<QunarPriceInfo>& vecQunarPriceInfo)
     m_iSuccess = 0;
     m_iFailed = 0;
 
-    /*
     //批量设置
     QVector<QunarPriceInfo> vecQunarPriceInfoBatch;
     QVector<QunarPriceInfo> vecTmp1 = vecQunarPriceInfo;
@@ -807,11 +806,10 @@ void QunerHttp::updateQunarPrice(QVector<QunarPriceInfo>& vecQunarPriceInfo)
         vecTmp1.clear();
         vecTmp1.swap(vecTmp2);
     }
-    */
 
-    for (int i = 0; i < vecQunarPriceInfo.size(); i++)
+    for (int i = 0; i < vecQunarPriceInfoBatch.size(); i++)
     {
-        setQunarPrice(vecQunarPriceInfo[i]);
+        setQunarPrice(vecQunarPriceInfoBatch[i]);
     }
 
     //Test
