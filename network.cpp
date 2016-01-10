@@ -7,6 +7,7 @@
 #include <QNetworkCookieJar>
 #include <QNetworkCookie>
 #include <QMessageBox>
+#include <QStringList>
 #include "mainwindow.h"
 
 /*
@@ -47,11 +48,19 @@ QunerHttp::QunerHttp(const QString & sUserName, const QString & sPassword, const
     m_pCaptchaDialog = new CaptchaDialog(parent);
     connect(m_pCaptchaDialog, SIGNAL(signalVcode(QString)), this, SLOT(getVcode(QString)));
     connect(m_pCaptchaDialog, SIGNAL(signalRefreshVcode()), this, SLOT(refreshVcode()));
+    connect(this, SIGNAL(netlog(QString)), m_pCaptchaDialog, SLOT(netlog(QString)));
+
     m_pMainWindow = parent;
 
     m_pFile = new QFile("debuglog.txt");
     m_pFile->open(QIODevice::WriteOnly | QIODevice::Append);
     m_stream.setDevice(m_pFile);
+
+    m_pTimer =  new QTimer(this);
+    connect(m_pTimer,SIGNAL(timeout()), this, SLOT(tryUpdatePriceToQunar()));
+    m_iTotal = 0;
+    m_iSuccess = 0;
+    m_iFailed = 0;
 }
 
 
@@ -85,8 +94,9 @@ void QunerHttp::reqSecApi()
                      + time + "&_=" + time));
     networkRequest.setSslConfiguration(config);
     QNetworkReply *pNetworkReply =  m_pNetworkManager->get(networkRequest);
-
     connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyReqSecApi()));
+
+    emit netlog("===================开始登录店铺" + m_sUserName + "===================");
 }
 
 void QunerHttp::loginQuner(const QString & answer, const QString & cookie, const QString & code)
@@ -159,23 +169,34 @@ void QunerHttp::replyLogin()
     //无错误返回
     if(pNetworkReply->error() == QNetworkReply::NoError)
     {
-        QByteArray bytes = pNetworkReply->readAll();  //获取字节
-        qDebug() << "status=" << status.toInt() << ",login back=" << QString(bytes) << endl;
-        QJsonDocument document = QJsonDocument::fromJson(bytes);
-        QJsonObject object = document.object();
-        if (false == object["ret"].toBool())
+        if (status.toInt() == 200)
         {
-            qDebug() << "errmsg=" << object["errmsg"].toString() << endl;
-            //处理错误
-            QMessageBox::information(NULL, QString("错误"),
-                         ", login error:" + object["errmsg"].toString());
 
+            QByteArray bytes = pNetworkReply->readAll();  //获取字节
+            qDebug() << "status=" << status.toInt() << ",login back=" << QString(bytes) << endl;
+            QJsonDocument document = QJsonDocument::fromJson(bytes);
+            QJsonObject object = document.object();
+            if (false == object["ret"].toBool())
+            {
+                qDebug() << "errmsg=" << object["errmsg"].toString() << endl;
+                //处理错误
+                QMessageBox::information(NULL, QString("错误"),
+                     ", login error:" + object["errmsg"].toString());
+
+            }
+            else
+            {
+                emit netlog("===================登录店铺" + m_sUserName + "成功===================");
+                updateQunarPrice(m_vecQunarPriceInfo);
+                m_vecQunarPriceInfo.clear();
+            }
         }
         else
         {
-            updateQunarPrice(m_vecQunerPriceInfo);
-            m_vecQunerPriceInfo.clear();
+
+            QMessageBox::information(NULL, QString("登录失败"), "Http Response Code:" + status.toString());
         }
+
     }
     else
     {
@@ -201,14 +222,21 @@ void QunerHttp::replyReqSecApi()
     //无错误返回
     if(pNetworkReply->error() == QNetworkReply::NoError)
     {
-        QByteArray bytes = pNetworkReply->readAll();  //获取字节
-        QString code(bytes);
-        qDebug() << "status=" + status.toString() << ",content=" << code << endl;
-        getAnswerV1(code, m_sAnswer);
-        getCookie(code, m_sCookie);
+        if (status.toInt() == 200)
+        {
+            QByteArray bytes = pNetworkReply->readAll();  //获取字节
+            QString code(bytes);
+            getAnswerV1(code, m_sAnswer);
+            getCookie(code, m_sCookie);
+            //启动登录流程
+            loginQuner(m_sAnswer, m_sCookie, m_sCode);
+        }
+        else
+        {
+            //处理错误
+            QMessageBox::information(NULL, QString("获取加密串失败"), "Http Response Code:" + status.toString());
+        }
 
-        //启动登录流程
-        loginQuner(m_sAnswer, m_sCookie, m_sCode);
     }
     else
     {
@@ -730,26 +758,62 @@ void QunerHttp::getAnswer(QString& jsFunc, QString& answer, QString& cookie)
     qDebug() << "cookie=" << param[3] << endl;
 }
 
-void QunerHttp::setQunarPrice4Update(QVector<QunarPriceInfo> &vecQunerPriceInfo)
+void QunerHttp::setQunarPrice4Update(QVector<QunarPriceInfo> &vecQunarPriceInfo)
 {
-    m_vecQunerPriceInfo = vecQunerPriceInfo;
+    m_vecQunarPriceInfo = vecQunarPriceInfo;
 }
 
-
-void QunerHttp::updateQunarPriceBatch(QVector<QunarPriceInfoBatch>& vecQunerPriceInfoBatch)
+void QunerHttp::updateQunarPrice(QVector<QunarPriceInfo>& vecQunarPriceInfo)
 {
-     for (int i = 0; i < vecQunerPriceInfoBatch.size(); i++)
-    {
-        setQunarPrice(vecQunerPriceInfoBatch[i].toPostForm().toUtf8());
-    }
-}
+    m_iTotal = vecQunarPriceInfo.size();
+    m_iSuccess = 0;
+    m_iFailed = 0;
 
-void QunerHttp::updateQunarPrice(QVector<QunarPriceInfo>& vecQunerPriceInfo)
-{
-    for (int i = 0; i < vecQunerPriceInfo.size(); i++)
+    /*
+    //批量设置
+    QVector<QunarPriceInfo> vecQunarPriceInfoBatch;
+    QVector<QunarPriceInfo> vecTmp1 = vecQunarPriceInfo;
+    QVector<QunarPriceInfo> vecTmp2;
+    while (true)
     {
-        setQunarPrice(vecQunerPriceInfo[i].toPostForm().toUtf8());
+        for (int i = 0; i <  vecTmp1.size(); i++)
+        {
+            QunarPriceInfo qunarPriceInfo = vecTmp1[i];
+            for (int j = i+1; j < vecTmp1.size(); j++)
+            {
+                if (vecTmp1[i].adult_price == vecTmp1[j].adult_price &&
+                     vecTmp1[i].child_price == vecTmp1[j].child_price &&
+                       vecTmp1[i].count == vecTmp1[j].count &&
+                        vecTmp1[i].market_price == vecTmp1[j].market_price &&
+                        vecTmp1[i].pId == vecTmp1[j].pId &&
+                        vecTmp1[i].room_send_price == vecTmp1[j].room_send_price &&
+                        vecTmp1[i].min_buy_count == vecTmp1[j].min_buy_count &&
+                        vecTmp1[i].max_buy_count == vecTmp1[j].max_buy_count)
+                {
+                   qunarPriceInfo.dateString.append(",").append(vecTmp1[j].dateString);
+                }
+                else
+                {
+                    vecTmp2.push_back(vecTmp1[j]);
+                }
+            }
+            vecQunarPriceInfoBatch.push_back(qunarPriceInfo);
+            break;
+        }
+        if (vecTmp2.size() <=0 )
+        {
+           break;
+        }
+        vecTmp1.clear();
+        vecTmp1.swap(vecTmp2);
     }
+    */
+
+    for (int i = 0; i < vecQunarPriceInfo.size(); i++)
+    {
+        setQunarPrice(vecQunarPriceInfo[i]);
+    }
+
     //Test
     /*
     QunarPriceInfo price;
@@ -767,9 +831,11 @@ void QunerHttp::updateQunarPrice(QVector<QunarPriceInfo>& vecQunerPriceInfo)
 
 }
 
-void QunerHttp::setQunarPrice(const QByteArray & post)
+void QunerHttp::setQunarPrice(const QunarPriceInfo & qunarPriceInfo)
 {
-    m_stream << "setQunarPrice=" << QString(post) << endl;
+    //m_stream << "setQunarPrice=" << qunarPriceInfo.toPostForm() << endl;
+    const QByteArray post = qunarPriceInfo.toPostForm().toUtf8();
+
     QSslConfiguration config;
     config.setPeerVerifyMode(QSslSocket::VerifyNone);
     config.setProtocol(QSsl::TlsV1_0);
@@ -781,17 +847,17 @@ void QunerHttp::setQunarPrice(const QByteArray & post)
     networkRequest.setUrl(
                 QUrl("https://tb2cadmin.qunar.com/supplier/productTeamOperation.do?method=operatProductTeams&op=update"));
     networkRequest.setSslConfiguration(config);
-
+    /*
     QList<QNetworkCookie> cookies =  m_pNetworkManager->cookieJar()->cookiesForUrl(
                 QUrl("https://tb2cadmin.qunar.com/supplier/productTeamOperation.do?method=operatProductTeams&op=update"));
     for (int i = 0; i < cookies.size(); i++)
     {
         qDebug() << "cookie[" << i << "]=" << QString(cookies[i].toRawForm()) << endl;
     }
+    */
     QNetworkReply *pNetworkReply = m_pNetworkManager->post(networkRequest, post);
-
+    m_mapQunarPriceInfo[pNetworkReply] = qunarPriceInfo;
     connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replySetQunarPrice()));
-
     connect(pNetworkReply, SIGNAL(sslErrors(QList<QSslError>)),
             this, SLOT(sslErrors(QList<QSslError>)));
 }
@@ -803,36 +869,86 @@ void QunerHttp::replySetQunarPrice()
     //获取响应的信息，状态码为200表示正常
     QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
 
+    QunarPriceInfo qunarPriceInfo = m_mapQunarPriceInfo[pNetworkReply];
+    m_mapQunarPriceInfo.remove(pNetworkReply);
+
     //无错误返回
     if(pNetworkReply->error() == QNetworkReply::NoError)
     {
-        QByteArray bytes = pNetworkReply->readAll();  //获取字节
-        qDebug() << "SetQunarPrice statue=" << status.toInt() << ",content=" << QString(bytes) << endl;
-        QJsonDocument document = QJsonDocument::fromJson(bytes);
-        QJsonObject object = document.object();
-        if (object["ret"].toInt() <= 0 || !object["message"].toString().contains("成功"))
+        //发生跳转
+        if (status.toInt() == 302 || status.toInt() == 301)
         {
-            qDebug() << "errmsg=" << object["message"].toString() << endl;
-            //处理错误
-            QMessageBox::information(NULL, QString("更新去哪儿网价格异常"), object["message"].toString());
-
+            /*
+            QString strRedirectUrl(pNetworkReply->rawHeader("Location"));
+            m_stream << "redirect url=" << strRedirectUrl << endl;
+            */
+            //将失败的放到队列中
+            m_vecTryQunarPriceInfo.push_back(qunarPriceInfo);
         }
-        m_stream << "setQunarPrice=" << QString(bytes) << endl;
-
+        else if (status.toInt() == 200)
+        {
+            QByteArray bytes = pNetworkReply->readAll();  //获取字节
+            //qDebug() << "SetQunarPrice statue=" << status.toInt() << ",content=" << QString(bytes) << endl;
+            QJsonDocument document = QJsonDocument::fromJson(bytes);
+            QJsonObject object = document.object();
+            if (object["ret"].toInt() > 0)
+            {
+                QStringList listItem = object["message"].toString().split("!");
+                for (int i = 0; i < listItem.size(); i++)
+                {
+                    QStringList listSubItem = listItem[i].split(":");
+                    if (listSubItem.size() > 1)
+                    {
+                        if (listSubItem[1].contains("成功"))
+                        {
+                            m_iSuccess++;
+                            emit netlog("======更新产品ID【" + qunarPriceInfo.pId + "】日期【" +
+                                listSubItem[0] + "】成功======");
+                        }
+                        else
+                        {
+                            m_iFailed++;
+                            emit netlog("======更新产品ID【" + qunarPriceInfo.pId + "】日期【" +
+                                listSubItem[0] + "】失败【" + listSubItem[1] + "】请重试======");
+                        }
+                    }
+                }
+                //处理错误
+                //QMessageBox::information(NULL, QString("更新去哪儿网价格异常"), object["message"].toString());
+            }
+            else
+            {
+                m_iFailed++;
+                emit netlog("======更新产品ID【" + qunarPriceInfo.pId + "】日期【" +
+                        qunarPriceInfo.dateString + "】失败【" + object["message"].toString() + "】======");
+            }
+            //m_stream << "setQunarPrice=" << QString(bytes) << endl;
+        }
     }
     else
     {
-        bool flag = QSslSocket::supportsSsl();
-        //处理错误
-        QMessageBox::information(NULL, QString("错误"),
-                                 pNetworkReply->errorString() +
-                                 ",support ssl:" + QString(flag?"true":"false") +
-                                 ",ssl version:" + QSslSocket::sslLibraryVersionString());
+        m_iFailed++;
+        emit netlog("======更新产品ID【" + qunarPriceInfo.pId + "】日期【" +
+                        qunarPriceInfo.dateString + "】失败【" + pNetworkReply->errorString() + "】======");
     }
-
     pNetworkReply->deleteLater();
-}
 
+    if (m_mapQunarPriceInfo.size() > 0)
+        return;
+
+    if (m_vecTryQunarPriceInfo.size() > 0)
+    {
+        emit netlog("还有【" + QString::number(m_vecTryQunarPriceInfo.size()) +
+                    "】条未更新成功,请勿关闭程序,等待1分钟,程序会自动更新......");
+        //定时1min
+        m_pTimer->start(60 * 1000);
+    }
+    else
+    {
+        emit netlog("总共【" + QString::number(m_iTotal)+ "】条成功【" + QString::number(m_iSuccess) +  "】条失败【" +
+                    QString::number(m_iFailed) + "】失败的记录请手动更新");
+    }
+}
 
 void QunerHttp::login()
 {
@@ -842,4 +958,14 @@ void QunerHttp::login()
 void QunerHttp::refreshVcode()
 {
     reqVcode();
+}
+
+void QunerHttp::tryUpdatePriceToQunar()
+{
+    for (int i = 0; i < m_vecTryQunarPriceInfo.size(); i++)
+    {
+        setQunarPrice(m_vecTryQunarPriceInfo[i]);
+    }
+    m_vecTryQunarPriceInfo.clear();
+    m_pTimer->stop();
 }

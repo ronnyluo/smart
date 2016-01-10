@@ -26,9 +26,11 @@ private slots:
     void on_pushButtonOk_clicked();
     void on_pushButtonOk_refresh_clicked();
     void on_pushButtonCancel_clicked();
+    void netlog(const QString & log);
 
 private:
     Ui::CaptchaDialog *ui;
+    QString m_strLog;
 };
 
 #endif // CAPTCHADIALOG_H

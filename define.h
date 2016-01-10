@@ -12,8 +12,8 @@
 //const QString QSS_CONFIG_FILE_PATH = "../smart/stylesheet.txt";
 //const QString PICTURE_FILE_PATH = "../smart/picture.png";
 
-//const QString SERVER_DOMAIN = "http://58.251.196.72:3000";
-const QString SERVER_DOMAIN = "http://cooktraver.aliapp.com";
+const QString SERVER_DOMAIN = "http://58.251.206.224:3000";
+//const QString SERVER_DOMAIN = "http://cooktraver.aliapp.com";
 
 //编译发布时使用
 const QString QSS_CONFIG_FILE_PATH = "stylesheet.txt";
@@ -361,7 +361,7 @@ typedef struct tagQunarPriceInfo
     QString min_buy_count; //每单至少人数
     QString max_buy_count; //每单至多人数
 
-    QString toPostForm()
+    QString toPostForm() const
     {
         return "market_price=" + market_price + "&adult_price=" +
                 adult_price + "&room_send_price=" + room_send_price +

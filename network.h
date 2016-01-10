@@ -9,6 +9,8 @@
 #include "define.h"
 #include <QFile>
 #include <QTextStream>
+#include <QMap>
+#include <QTimer>
 
 
 class MainWindow;
@@ -82,7 +84,6 @@ public:
     void setPassword(const QString & sPassword);
 
     void updateQunarPrice(QVector<QunarPriceInfo>& vecQunerPriceInfo);
-    void updateQunarPriceBatch(QVector<QunarPriceInfoBatch>& vecQunerPriceInfoBatch);
     void login();
     void setQunarPrice4Update(QVector<QunarPriceInfo>& vecQunerPriceInfo);
 
@@ -96,6 +97,7 @@ private slots:
     void replySetQunarPrice();
     void getVcode(const QString & code);
     void refreshVcode();
+    void tryUpdatePriceToQunar();
 
 private:
     void reqQunerHome();
@@ -105,7 +107,10 @@ private:
     void getAnswerV1(QString& jsFunc, QString& answer);
     void getCookie(QString & jsCode, QString & cookie);
     void reqVcode();
-    void setQunarPrice(const QByteArray & post);
+    void setQunarPrice(const QunarPriceInfo & qunarPriceInfo);
+
+signals:
+    void netlog(const QString & log);
 
 private:
     bool m_bNeedCaptcha;
@@ -120,7 +125,13 @@ private:
     QTextStream  m_stream;
     QFile * m_pFile;
     QString m_sChannelName;
-    QVector<QunarPriceInfo> m_vecQunerPriceInfo;
+    QMap<QNetworkReply*, QunarPriceInfo> m_mapQunarPriceInfo;
+    QVector<QunarPriceInfo> m_vecTryQunarPriceInfo; //重试队列
+    QVector<QunarPriceInfo> m_vecQunarPriceInfo;
+    QTimer * m_pTimer;
+    int m_iTotal;
+    int m_iSuccess;
+    int m_iFailed;
 };
 
 #endif // NETWORK_H

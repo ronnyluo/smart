@@ -20,6 +20,8 @@ void CaptchaDialog::init(const QByteArray & codeBytes)
     QPixmap pixmap;
     pixmap.loadFromData(codeBytes);
     ui->label_img->setPixmap(pixmap.scaled(ui->label_img->size()));
+
+    m_strLog.clear();
 }
 
 CaptchaDialog::~CaptchaDialog()
@@ -35,16 +37,25 @@ void CaptchaDialog::on_pushButtonOk_clicked()
         QMessageBox::information(NULL, QString("提示"), "请输入验证码");
         return;
     }
-    this->hide();
     emit signalVcode(text);
 }
 
 void CaptchaDialog::on_pushButtonCancel_clicked()
 {
-    this->hide();
+    //this->hide();
 }
 
 void CaptchaDialog::on_pushButtonOk_refresh_clicked()
 {
     emit signalRefreshVcode();
+}
+
+void CaptchaDialog::netlog(const QString & log)
+{
+    if (!m_strLog.isEmpty())
+    {
+        m_strLog.append("\n");
+    }
+    m_strLog.append(log);
+    ui->textBrowser_log->setPlainText(m_strLog);
 }
