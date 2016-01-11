@@ -365,7 +365,7 @@ void QunerHttp::replyGetVcode()
         QByteArray bytes = pNetworkReply->readAll();  //获取字节
         qDebug() << "QunerHome statue=" << status.toInt() << ",content=" << QString(bytes) << endl;
         //需要验证码
-        if (m_bNeedCaptcha)
+        if (/*m_bNeedCaptcha*/true)
         {
             m_pCaptchaDialog->init(bytes);
             m_pCaptchaDialog->show();
