@@ -363,7 +363,8 @@ void QunerHttp::replyGetVcode()
     if(pNetworkReply->error() == QNetworkReply::NoError)
     {
         QByteArray bytes = pNetworkReply->readAll();  //获取字节
-        qDebug() << "QunerHome statue=" << status.toInt() << ",content=" << QString(bytes) << endl;
+        m_stream << "getVcode statue=" << status.toInt() << ",content size=" <<  bytes.size() << endl;
+
         //需要验证码
         if (/*m_bNeedCaptcha*/true)
         {
