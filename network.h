@@ -127,7 +127,9 @@ private:
     QString m_sChannelName;
     QMap<QNetworkReply*, QunarPriceInfo> m_mapQunarPriceInfo;
     QVector<QunarPriceInfo> m_vecTryQunarPriceInfo; //重试队列
-    QVector<QunarPriceInfo> m_vecQunarPriceInfo;
+    QVector<QunarPriceInfo> m_vecQunarPriceInfo;  //需要更新的原始队列
+    QVector<QunarPriceInfo> m_vecQunarPriceInfoBatch; //批量更新的队列
+
     QTimer * m_pTimer;
     int m_iTotal;
     int m_iSuccess;

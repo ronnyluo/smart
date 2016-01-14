@@ -771,7 +771,6 @@ void QunerHttp::updateQunarPrice(QVector<QunarPriceInfo>& vecQunarPriceInfo)
     m_iFailed = 0;
 
     //批量设置
-    QVector<QunarPriceInfo> vecQunarPriceInfoBatch;
     QVector<QunarPriceInfo> vecTmp1 = vecQunarPriceInfo;
     QVector<QunarPriceInfo> vecTmp2;
     while (true)
@@ -797,7 +796,7 @@ void QunerHttp::updateQunarPrice(QVector<QunarPriceInfo>& vecQunarPriceInfo)
                     vecTmp2.push_back(vecTmp1[j]);
                 }
             }
-            vecQunarPriceInfoBatch.push_back(qunarPriceInfo);
+            m_vecQunarPriceInfoBatch.push_back(qunarPriceInfo);
             break;
         }
         if (vecTmp2.size() <=0 )
@@ -808,10 +807,8 @@ void QunerHttp::updateQunarPrice(QVector<QunarPriceInfo>& vecQunarPriceInfo)
         vecTmp1.swap(vecTmp2);
     }
 
-    for (int i = 0; i < vecQunarPriceInfoBatch.size(); i++)
-    {
-        setQunarPrice(vecQunarPriceInfoBatch[i]);
-    }
+    //启动定时器，更新价格
+    m_pTimer->start(5 * 1000);
 
     //Test
     /*
@@ -832,7 +829,7 @@ void QunerHttp::updateQunarPrice(QVector<QunarPriceInfo>& vecQunarPriceInfo)
 
 void QunerHttp::setQunarPrice(const QunarPriceInfo & qunarPriceInfo)
 {
-    //m_stream << "setQunarPrice=" << qunarPriceInfo.toPostForm() << endl;
+    m_stream << "setQunarPrice=" << qunarPriceInfo.toPostForm() << endl;
     const QByteArray post = qunarPriceInfo.toPostForm().toUtf8();
 
     QSslConfiguration config;
@@ -892,6 +889,7 @@ void QunerHttp::replySetQunarPrice()
             QJsonObject object = document.object();
             if (object["ret"].toInt() > 0)
             {
+                m_stream << "message=" << object["message"].toString() << endl;
                 QStringList listItem = object["message"].toString().split("!");
                 for (int i = 0; i < listItem.size(); i++)
                 {
@@ -908,7 +906,7 @@ void QunerHttp::replySetQunarPrice()
                         {
                             m_iFailed++;
                             emit netlog("======更新产品ID【" + qunarPriceInfo.pId + "】日期【" +
-                                listSubItem[0] + "】失败【" + listSubItem[1] + "】请重试======");
+                                listSubItem[0] + "】失败【" + listSubItem[1] + "】，请检查======");
                         }
                     }
                 }
@@ -932,6 +930,10 @@ void QunerHttp::replySetQunarPrice()
     }
     pNetworkReply->deleteLater();
 
+    //启动定时器，更新价格
+    m_pTimer->start(5 * 1000);
+
+    /*
     if (m_mapQunarPriceInfo.size() > 0)
         return;
 
@@ -944,9 +946,10 @@ void QunerHttp::replySetQunarPrice()
     }
     else
     {
-        emit netlog("总共【" + QString::number(m_iTotal)+ "】条成功【" + QString::number(m_iSuccess) +  "】条失败【" +
-                    QString::number(m_iFailed) + "】失败的记录请手动更新");
+        emit netlog("总共【" + QString::number(m_iTotal)+ "】条成功【" + QString::number(m_iSuccess) +  "】条,失败【" +
+                    QString::number(m_iFailed) + "】条,失败的记录请手动更新");
     }
+    */
 }
 
 void QunerHttp::login()
@@ -961,10 +964,31 @@ void QunerHttp::refreshVcode()
 
 void QunerHttp::tryUpdatePriceToQunar()
 {
-    for (int i = 0; i < m_vecTryQunarPriceInfo.size(); i++)
+    if (m_vecQunarPriceInfoBatch.size() > 0)
     {
-        setQunarPrice(m_vecTryQunarPriceInfo[i]);
+        for (QVector<QunarPriceInfo>::iterator it = m_vecQunarPriceInfoBatch.begin();
+             it != m_vecQunarPriceInfoBatch.end(); ++it)
+        {
+            setQunarPrice(*it);
+            m_vecQunarPriceInfoBatch.erase(it);
+            break;
+        }
     }
-    m_vecTryQunarPriceInfo.clear();
+    else if (m_vecTryQunarPriceInfo.size() > 0)
+    {
+        for (QVector<QunarPriceInfo>::iterator it = m_vecTryQunarPriceInfo.begin();
+             it != m_vecTryQunarPriceInfo.end(); ++it)
+        {
+            setQunarPrice(*it);
+            m_vecTryQunarPriceInfo.erase(it);
+            break;
+        }
+    }
+    else
+    {
+        emit netlog("总共【" + QString::number(m_iTotal)+ "】条成功【" + QString::number(m_iSuccess) +  "】条,失败【" +
+                    QString::number(m_iFailed) + "】条,失败的记录请检查修改后，重新更新");
+
+    }
     m_pTimer->stop();
 }

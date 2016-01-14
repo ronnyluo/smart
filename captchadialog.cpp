@@ -4,6 +4,7 @@
 #include <QPicture>
 #include <QPixmap>
 #include <QMessageBox>
+#include <QImage>
 
 CaptchaDialog::CaptchaDialog(QWidget *parent) :
     QDialog(parent),

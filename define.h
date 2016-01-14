@@ -12,7 +12,7 @@
 //const QString QSS_CONFIG_FILE_PATH = "../smart/stylesheet.txt";
 //const QString PICTURE_FILE_PATH = "../smart/picture.png";
 
-const QString SERVER_DOMAIN = "http://58.251.206.224:3000";
+const QString SERVER_DOMAIN = "http://58.251.198.180:3000";
 //const QString SERVER_DOMAIN = "http://cooktraver.aliapp.com";
 
 //编译发布时使用
