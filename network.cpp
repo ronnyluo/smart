@@ -193,7 +193,13 @@ void QunerHttp::replyLogin()
         }
         else
         {
-
+             //发生跳转
+            if (status.toInt() == 302 || status.toInt() == 301)
+            {
+                QString strRedirectUrl(pNetworkReply->rawHeader("Location"));
+                m_stream << "login reply status=" << status.toInt() << ",redirect url=" << strRedirectUrl
+                         << ",response=" << QString(pNetworkReply->readAll()) << endl;
+            }
             QMessageBox::information(NULL, QString("登录失败"), "Http Response Code:" + status.toString());
         }
 
