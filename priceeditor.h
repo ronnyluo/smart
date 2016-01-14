@@ -35,6 +35,7 @@ private slots:
     void childPriceLienEditChanged(QString strChildPrice);
     void calendarItemCheckSlot(CalendarItem* item, bool bCheck);
     void on_pushButton_back_clicked();
+    void on_pushButton_Save_clicked();
     void singleRoomLienEditChanged(QString strSingleRoom);
     void retailPriceLineEditChanged(QString strRetailPrice);
     void stockLineEditChanged(QString strStock);
@@ -44,6 +45,9 @@ private slots:
 private:
     bool eventFilter(QObject *target, QEvent *event);
     void showPriceOnRightUI(CalendarItem* item);
+
+signals:
+    void saveSignals(PriceEditorMode editorMode);
 
 private:
     Ui::PriceEditor *ui;

@@ -44,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_pPriceEditor = new PriceEditor(this, PRICE_EDITOR_TICKET_MODE);
     m_pPriceEditor->hide();
+    connect(m_pPriceEditor, SIGNAL(saveSignals(PriceEditorMode)), this, SLOT(saveSignalsSlot(PriceEditorMode)));
     connect(m_pPriceEditor->getCalendar(), SIGNAL(updatePriceInfoSignal(QMap<QString, QMap<QString, TicketPriceInfo> >&)), this, SLOT(updatePriceInfoSlot(QMap<QString, QMap<QString, TicketPriceInfo> >&)));
 
     //地接模块UI
@@ -64,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->lineEdit_ChannelServiceSearch, SIGNAL(textChanged(QString)), this, SLOT(findChannelServiceChanged(QString)));
     m_pPickServicePriceEditor = new PriceEditor(this, PRICE_EDITOR_PICK_SERVICE);
     m_pPickServicePriceEditor->hide();
+    connect(m_pPickServicePriceEditor, SIGNAL(saveSignals(PriceEditorMode)), this, SLOT(saveSignalsSlot(PriceEditorMode)));
     connect(m_pPickServicePriceEditor->getCalendar(), SIGNAL(updatePriceInfoSignal(QMap<QString, QMap<QString, TicketPriceInfo> >&)), this, SLOT(updateServicePriceInfoSlot(QMap<QString, QMap<QString, TicketPriceInfo> >&)));
 
     //渠道模块
@@ -306,6 +308,10 @@ void MainWindow::on_pushButtonUpdate_clicked()
         {
              m_vecTicketInfo[i] = tmpTicketInfo;
         }
+        else
+        {
+            return;
+        }
     }
     else
     {
@@ -323,6 +329,10 @@ void MainWindow::on_pushButtonUpdate_clicked()
             ui->lineEdit_No->setText(tmpTicketInfo.strTicketNo);
             m_vecTicketInfo.push_back(tmpTicketInfo);
             addItemToTicketList(tmpTicketInfo);
+        }
+        else
+        {
+            return;
         }
     }
     updateTicket(tmpTicketInfo);
@@ -662,6 +672,10 @@ void MainWindow::on_pushButton_ServiceUpdate_clicked()
         {
              m_vecPickServiceInfo[i] = tmpPickServiceInfo;
         }
+        else
+        {
+            return;
+        }
     }
     else
     {
@@ -679,6 +693,10 @@ void MainWindow::on_pushButton_ServiceUpdate_clicked()
             ui->lineEdit_ServiceNo->setText(tmpPickServiceInfo.strNo);
             m_vecPickServiceInfo.push_back(tmpPickServiceInfo);
             addItemToServiceList(tmpPickServiceInfo);
+        }
+        else
+        {
+            return;
         }
     }
     updatePickService(tmpPickServiceInfo);
@@ -1887,13 +1905,28 @@ void MainWindow::update2Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pickServ
                                 vecUpdatePriceInfo.push_back(vecQunerPriceInfoTmp[index]);
                             }
                         }
-                        m_vecQunerHttPtr[indexHttp]->setQunarPrice4Update(vecUpdatePriceInfo);
-                        qDebug() << "帐号：" << m_vecQunerHttPtr[indexHttp]->GetUserName()
-                                 << " 密码：" << m_vecQunerHttPtr[indexHttp]->GetChannelName() << endl;
-                        m_vecQunerHttPtr[indexHttp]->login();
+                        if(vecUpdatePriceInfo.size() != 0)
+                        {
+                            m_vecQunerHttPtr[indexHttp]->setQunarPrice4Update(vecUpdatePriceInfo);
+                            qDebug() << "帐号：" << m_vecQunerHttPtr[indexHttp]->GetUserName()
+                                     << " 密码：" << m_vecQunerHttPtr[indexHttp]->GetChannelName() << endl;
+                            m_vecQunerHttPtr[indexHttp]->login();
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+void MainWindow::saveSignalsSlot(PriceEditorMode eMode)
+{
+    if(PRICE_EDITOR_TICKET_MODE == eMode)
+    {
+        on_pushButtonUpdate_clicked();
+    }
+    else if(PRICE_EDITOR_PICK_SERVICE == eMode)
+    {
+        on_pushButton_ServiceUpdate_clicked();
     }
 }

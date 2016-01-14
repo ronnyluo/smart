@@ -368,3 +368,8 @@ void PriceEditor::on_pushButton_back_clicked()
 {
     hide();
 }
+
+void PriceEditor::on_pushButton_Save_clicked()
+{
+    emit saveSignals(m_mode);
+}

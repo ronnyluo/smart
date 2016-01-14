@@ -75,6 +75,8 @@ private slots:
     void on_pushButton_ChannelRelationDel_clicked();
     void on_pushButton_ChannelRelationCancel_clicked();
 
+    void saveSignalsSlot(PriceEditorMode eMode);
+
 private:
     void addItemToTicketList(TicketInfo& ticketInfo);
     bool hasSameTicketNo(QString ticketNo);
