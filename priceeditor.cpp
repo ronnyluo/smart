@@ -232,7 +232,7 @@ void PriceEditor::adultPriceLienEditChanged(QString strAdultPrice)
             if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked() && ""!=ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText())
             {
                 ui->widgetCalendar->m_pCalendarItemArray[i][j]->setAdultPrice(strAdultPrice);
-                ui->widgetCalendar->updateTicketAdultPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strAdultPrice.toInt());
+                //ui->widgetCalendar->updateTicketAdultPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strAdultPrice.toInt());
 
                 qDebug() << "price:" << ui->widgetCalendar->getHelpPriceInfo(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText()).nTicketAdultPrice;
                 qDebug() << "day:" << ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText();
@@ -251,7 +251,7 @@ void PriceEditor::childPriceLienEditChanged(QString strChildPrice)
             if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked() && ""!=ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText())
             {
                 ui->widgetCalendar->m_pCalendarItemArray[i][j]->setChildPrice(strChildPrice);
-                ui->widgetCalendar->updateTicketChildPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strChildPrice.toInt());
+                //ui->widgetCalendar->updateTicketChildPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strChildPrice.toInt());
 
                 int nChildPrice = strChildPrice.toInt() + ui->widgetCalendar->getHelpPriceInfo(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText()).nTicketChildPrice;
                 ui->lineEdit_ChildTotal->setText(QString::number(nChildPrice));
@@ -269,7 +269,7 @@ void PriceEditor::singleRoomLienEditChanged(QString strSingleRoom)
             if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked() && ""!=ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText())
             {
                 ui->widgetCalendar->m_pCalendarItemArray[i][j]->setSingleRoom(strSingleRoom);
-                ui->widgetCalendar->updateSingleRoomPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strSingleRoom.toInt());
+                //ui->widgetCalendar->updateSingleRoomPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strSingleRoom.toInt());
             }
         }
     }
@@ -283,7 +283,7 @@ void PriceEditor::retailPriceLineEditChanged(QString strRetailPrice)
         {
             if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked() && ""!=ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText())
             {
-                ui->widgetCalendar->updateRetailPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strRetailPrice.toInt());
+                //ui->widgetCalendar->updateRetailPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strRetailPrice.toInt());
             }
         }
     }
@@ -297,7 +297,7 @@ void PriceEditor::stockLineEditChanged(QString strStock)
         {
             if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked() && ""!=ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText())
             {
-                ui->widgetCalendar->updateStock(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strStock.toInt());
+                //ui->widgetCalendar->updateStock(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strStock.toInt());
             }
         }
     }
@@ -311,7 +311,7 @@ void PriceEditor::minPerOrderLineEditChanged(QString strMinPerOrder)
         {
             if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked() && ""!=ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText())
             {
-                ui->widgetCalendar->updateMinPerOrder(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strMinPerOrder.toInt());
+                //ui->widgetCalendar->updateMinPerOrder(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strMinPerOrder.toInt());
             }
         }
     }
@@ -325,7 +325,7 @@ void PriceEditor::maxPerOrderLineEditChanged(QString strMaxPerOrder)
         {
             if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked() && ""!=ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText())
             {
-                ui->widgetCalendar->updateMaxPerOrder(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strMaxPerOrder.toInt());
+                //ui->widgetCalendar->updateMaxPerOrder(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), strMaxPerOrder.toInt());
             }
         }
     }
@@ -371,5 +371,21 @@ void PriceEditor::on_pushButton_back_clicked()
 
 void PriceEditor::on_pushButton_Save_clicked()
 {
+    for(int i=1; i<7; i++)
+    {
+        for(int j=0; j<7; j++)
+        {
+            if(ui->widgetCalendar->m_pCalendarItemArray[i][j]->isChecked() && ""!=ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText())
+            {
+                ui->widgetCalendar->updateTicketAdultPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), ui->lineEdit_AdultPrice->text().toInt());
+                ui->widgetCalendar->updateTicketChildPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), ui->lineEdit_ChildPrice->text().toInt());
+                ui->widgetCalendar->updateSingleRoomPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), ui->lineEdit_SingleRoom->text().toInt());
+                ui->widgetCalendar->updateRetailPrice(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), ui->lineEdit_RetailPrice->text().toInt());
+                ui->widgetCalendar->updateStock(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), ui->lineEdit_Stock->text().toInt());
+                ui->widgetCalendar->updateMinPerOrder(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), ui->lineEdit_MinPerOrder->text().toInt());
+                ui->widgetCalendar->updateMaxPerOrder(ui->widgetCalendar->m_pCalendarItemArray[i][j]->getText(), ui->lineEdit_MaxPerOrder->text().toInt());
+            }
+        }
+    }
     emit saveSignals(m_mode);
 }

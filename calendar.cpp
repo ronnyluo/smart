@@ -262,6 +262,8 @@ void Calendar::setHelpPriceInfo(QMap<QString, QMap<QString, TicketPriceInfo> > &
 
 void Calendar::getPriceInfo(QMap<QString, QMap<QString, TicketPriceInfo> > &mapTicketPriceInfo)
 {
+    //删除过期数据
+
     mapTicketPriceInfo = m_mapTicketPriceInfo;
 }
 
