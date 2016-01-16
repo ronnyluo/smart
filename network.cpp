@@ -46,9 +46,13 @@ QunerHttp::QunerHttp(const QString & sUserName, const QString & sPassword, const
 {
     m_pNetworkManager = new QNetworkAccessManager(this);
     m_pCaptchaDialog = new CaptchaDialog(parent);
+    m_pWebwindow = new DialogWebview(parent);
+    m_pWebwindow->initialize(sUserName, sPassword);
+
     connect(m_pCaptchaDialog, SIGNAL(signalVcode(QString)), this, SLOT(getVcode(QString)));
     connect(m_pCaptchaDialog, SIGNAL(signalRefreshVcode()), this, SLOT(refreshVcode()));
-    connect(this, SIGNAL(netlog(QString)), m_pCaptchaDialog, SLOT(netlog(QString)));
+    connect(this, SIGNAL(netlog(QString)), m_pWebwindow, SLOT(netlog(QString)));
+    connect(m_pWebwindow, SIGNAL(startUpdate(QNetworkCookieJar*)), this, SLOT(startUpdate(QNetworkCookieJar*)));
 
     m_pMainWindow = parent;
 
@@ -350,8 +354,10 @@ void QunerHttp::reqVcode()
 
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "image/jpeg");
+
+    QString time = QString::number(QDateTime::currentDateTime().toMSecsSinceEpoch());
     networkRequest.setUrl(
-                QUrl("https://user.qunar.com/captcha/api/image?k={en7mni(z&p=ucenter_login&c=ef7d278eca6d25aa6aec7272d57f0a9a"));
+                QUrl("https://user.qunar.com/captcha/api/image?k={en7mni(z&p=ucenter_login&c=ef7d278eca6d25aa6aec7272d57f0a9a&time=" + time));
     networkRequest.setSslConfiguration(config);
     QNetworkReply *pNetworkReply =  m_pNetworkManager->get(networkRequest);
 
@@ -404,6 +410,12 @@ void QunerHttp::getVcode(const QString & code)
     reqSecApi();
 }
 
+
+
+void QunerHttp::getAnswerV2(QString& jsFunc, QString& answer)
+{
+
+}
 
 void QunerHttp::getAnswerV1(QString& jsFunc, QString& answer)
 {
@@ -960,8 +972,11 @@ void QunerHttp::replySetQunarPrice()
 
 void QunerHttp::login()
 {
+    m_pWebwindow->show();
+    m_pWebwindow->setUrl(
+                QUrl("https://user.qunar.com/passport/login.jsp?ret=http%3A%2F%2Ftb2cadmin.qunar.com%2F"));
     //启动登录流程
-    reqQunerHome();
+    //reqQunerHome();
 }
 void QunerHttp::refreshVcode()
 {
@@ -997,4 +1012,12 @@ void QunerHttp::tryUpdatePriceToQunar()
 
     }
     m_pTimer->stop();
+}
+
+
+void QunerHttp::startUpdate(QNetworkCookieJar * pCookieJar)
+{
+    updateQunarPrice(m_vecQunarPriceInfo);
+    m_pNetworkManager->setCookieJar(pCookieJar);
+    pCookieJar->setParent(NULL);
 }

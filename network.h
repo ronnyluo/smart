@@ -11,6 +11,7 @@
 #include <QTextStream>
 #include <QMap>
 #include <QTimer>
+#include  "dialogwebview.h"
 
 
 class MainWindow;
@@ -98,6 +99,7 @@ private slots:
     void getVcode(const QString & code);
     void refreshVcode();
     void tryUpdatePriceToQunar();
+    void startUpdate(QNetworkCookieJar * pCookieJar);
 
 private:
     void reqQunerHome();
@@ -105,6 +107,7 @@ private:
     void reqSecApi();
     void getAnswer(QString& jsFunc, QString& answer, QString& cookie);
     void getAnswerV1(QString& jsFunc, QString& answer);
+    void getAnswerV2(QString& jsFunc, QString& answer);
     void getCookie(QString & jsCode, QString & cookie);
     void reqVcode();
     void setQunarPrice(const QunarPriceInfo & qunarPriceInfo);
@@ -134,6 +137,8 @@ private:
     int m_iTotal;
     int m_iSuccess;
     int m_iFailed;
+
+    DialogWebview * m_pWebwindow;
 };
 
 #endif // NETWORK_H

@@ -7,7 +7,7 @@
 QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-QT += network  qml
+QT += network  qml  webkitwidgets
 
 TARGET = tool
 TEMPLATE = app
@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     priceeditor.cpp \
     network.cpp \
     captchadialog.cpp \
-    define.cpp
+    define.cpp \
+    dialogwebview.cpp
 
 HEADERS  += mainwindow.h \
     define.h \
@@ -28,10 +29,12 @@ HEADERS  += mainwindow.h \
     calendar.h \
     priceeditor.h \
     network.h \
-    captchadialog.h
+    captchadialog.h \
+    dialogwebview.h
 
 FORMS    += mainwindow.ui \
     calendaritem.ui \
     calendar.ui \
     priceeditor.ui \
-    captchadialog.ui
+    captchadialog.ui \
+    dialogwebview.ui
