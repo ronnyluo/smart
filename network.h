@@ -100,6 +100,7 @@ private slots:
     void refreshVcode();
     void tryUpdatePriceToQunar();
     void startUpdate(QNetworkCookieJar * pCookieJar);
+    void loginSuccess();
 
 private:
     void reqQunerHome();
@@ -139,6 +140,7 @@ private:
     int m_iFailed;
 
     DialogWebview * m_pWebwindow;
+    bool m_bLogin;
 };
 
 #endif // NETWORK_H

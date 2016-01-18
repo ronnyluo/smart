@@ -25,6 +25,7 @@ private slots:
     void netlog(const QString & log);
 signals:
     void startUpdate(QNetworkCookieJar * pCookieJar);
+    void loginSuccess();
 private:
     QString m_sName;
     QString m_sPassword;

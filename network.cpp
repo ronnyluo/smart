@@ -44,6 +44,7 @@ QunerHttp::QunerHttp(const QString & sUserName, const QString & sPassword, const
       m_sPassword(sPassword),
       m_sChannelName(strChannelName)
 {
+    m_bLogin = false;
     m_pNetworkManager = new QNetworkAccessManager(this);
     m_pCaptchaDialog = new CaptchaDialog(parent);
     m_pWebwindow = new DialogWebview(parent);
@@ -53,6 +54,7 @@ QunerHttp::QunerHttp(const QString & sUserName, const QString & sPassword, const
     connect(m_pCaptchaDialog, SIGNAL(signalRefreshVcode()), this, SLOT(refreshVcode()));
     connect(this, SIGNAL(netlog(QString)), m_pWebwindow, SLOT(netlog(QString)));
     connect(m_pWebwindow, SIGNAL(startUpdate(QNetworkCookieJar*)), this, SLOT(startUpdate(QNetworkCookieJar*)));
+    connect(m_pWebwindow, SIGNAL(loginSuccess()), this, SLOT(loginSuccess()));
 
     m_pMainWindow = parent;
 
@@ -933,6 +935,8 @@ void QunerHttp::replySetQunarPrice()
             }
             else
             {
+
+                m_stream << "erro rsp=" <<  QString(bytes) << endl;
                 m_iFailed++;
                 emit netlog("======更新产品ID【" + qunarPriceInfo.pId + "】日期【" +
                         qunarPriceInfo.dateString + "】失败【" + object["message"].toString() + "】======");
@@ -973,8 +977,11 @@ void QunerHttp::replySetQunarPrice()
 void QunerHttp::login()
 {
     m_pWebwindow->show();
-    m_pWebwindow->setUrl(
+    if (!m_bLogin)
+    {
+        m_pWebwindow->setUrl(
                 QUrl("https://user.qunar.com/passport/login.jsp?ret=http%3A%2F%2Ftb2cadmin.qunar.com%2F"));
+    }
     //启动登录流程
     //reqQunerHome();
 }
@@ -1007,8 +1014,8 @@ void QunerHttp::tryUpdatePriceToQunar()
     }
     else
     {
-        emit netlog("总共【" + QString::number(m_iTotal)+ "】条成功【" + QString::number(m_iSuccess) +  "】条,失败【" +
-                    QString::number(m_iFailed) + "】条,失败的记录请检查修改后，重新更新");
+        emit netlog("总共【" + QString::number(m_iTotal)+ "】条,成功【" + QString::number(m_iSuccess) +  "】条,失败【" +
+                    QString::number(m_iFailed) + "】条,请检查失败记录或重启程序后，继续更新");
 
     }
     m_pTimer->stop();
@@ -1020,4 +1027,10 @@ void QunerHttp::startUpdate(QNetworkCookieJar * pCookieJar)
     updateQunarPrice(m_vecQunarPriceInfo);
     m_pNetworkManager->setCookieJar(pCookieJar);
     pCookieJar->setParent(NULL);
+}
+
+
+void QunerHttp::loginSuccess()
+{
+   m_bLogin = true;
 }

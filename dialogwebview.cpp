@@ -72,6 +72,7 @@ void DialogWebview::loadFinished(bool bOk)
         qDebug() << "af autocomplete=" << password.attribute("autocomplete") << endl;
     }
     disconnect(ui->webView, SIGNAL(loadFinished(bool)), this, SLOT(loadFinished(bool)));
+    emit loginSuccess();
 }
 
 void DialogWebview::netlog(const QString & log)
