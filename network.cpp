@@ -976,6 +976,7 @@ void QunerHttp::replySetQunarPrice()
 
 void QunerHttp::login()
 {
+    m_pWebwindow->clearLog();
     m_pWebwindow->show();
     if (!m_bLogin)
     {

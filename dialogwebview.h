@@ -18,6 +18,7 @@ public:
     void initialize(const QString sName, const QString sPassword);
 
     void setUrl(const QUrl & url);
+    void clearLog();
 
 private slots:
     void on_pushButton_clicked();

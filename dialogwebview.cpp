@@ -84,3 +84,8 @@ void DialogWebview::netlog(const QString & log)
     m_strLog.append(log);
     ui->textBrowser->setPlainText(m_strLog);
 }
+
+void DialogWebview::clearLog()
+{
+    ui->textBrowser->clear();
+}

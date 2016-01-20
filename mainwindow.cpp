@@ -1792,7 +1792,8 @@ void MainWindow::update2Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pickServ
         if(strYearMonth.size() >= 4)
         {
             int nYear = strYearMonth.left(4).toInt();
-            int nMonth = strYearMonth.remove(0, 4).toInt();
+            QString strYearMonthBak = strYearMonth;
+            int nMonth = strYearMonthBak.remove(0, 4).toInt();
             if(nYear>2015 && nYear<=2020 && nMonth>0 && nMonth<=12)
             {
                 QMap<QString, TicketPriceInfo> &tmpTicketPriceInfo = iterMapTicketPriceInfo.value();
@@ -1803,18 +1804,18 @@ void MainWindow::update2Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pickServ
                     {
                         QString strDay = iterTmpTicketPriceInfo.key();
                         int nDay = strDay.toInt();
-                        if(nDay>0 && nDay <=12)
+                        if(nDay>0 && nDay <=31)
                         {
                             QDate tmpDay = QDate(nYear, nMonth, nDay);
                             QunarPriceInfo tmpQunarPriceInfo;
-                            tmpQunarPriceInfo.dateString = tmpDay.toString("yy-MM-dd");
-                            tmpQunarPriceInfo.adult_price = ticketInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketAdultPrice + pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketAdultPrice;
-                            tmpQunarPriceInfo.child_price = ticketInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketChildPrice + pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketChildPrice;
-                            tmpQunarPriceInfo.count = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketStock;
-                            tmpQunarPriceInfo.market_price = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketRetailPrice;
-                            tmpQunarPriceInfo.max_buy_count = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nMaxPerOrder;
-                            tmpQunarPriceInfo.min_buy_count = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nMinPerOrder;
-                            tmpQunarPriceInfo.room_send_price = pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nSigleRoomSpread;
+                            tmpQunarPriceInfo.dateString = tmpDay.toString("yyyy-MM-dd");
+                            tmpQunarPriceInfo.adult_price = QString::number(ticketInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketAdultPrice + pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketAdultPrice);
+                            tmpQunarPriceInfo.child_price = QString::number(ticketInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketChildPrice + pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketChildPrice);
+                            tmpQunarPriceInfo.count = QString::number(pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketStock);
+                            tmpQunarPriceInfo.market_price = QString::number(pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nTicketRetailPrice);
+                            tmpQunarPriceInfo.max_buy_count = QString::number(pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nMaxPerOrder);
+                            tmpQunarPriceInfo.min_buy_count = QString::number(pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nMinPerOrder);
+                            tmpQunarPriceInfo.room_send_price = QString::number(pickServiceInfo.mapTicketPriceInfo[strYearMonth][strDay].nSigleRoomSpread);
                             vecQunerPriceInfo.push_back(tmpQunarPriceInfo);
                         }
                     }
