@@ -122,8 +122,11 @@ private:
     void initUI();
     void getAnswer(QString& jsFunc, QString& answer, QString& cookie);
 
-    //更新数据到去哪儿网
-    void update2Qunaer(TicketInfo& ticketInfo, PickServiceInfo &pickServiceInfo);
+    //获取更新去哪儿网的数据
+    void getPriceInfo4Qunaer(TicketInfo& ticketInfo, PickServiceInfo &pickServiceInfo, QMap<QString, QVector<QunarPriceInfo> > &mapQunarPriceInfo);
+
+    //更新去哪儿网数据
+    void update2Qunaer(QMap<QString, QVector<QunarPriceInfo> > mapQunarPriceInfo);
 
 private:
     Ui::MainWindow *ui;

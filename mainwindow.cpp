@@ -337,13 +337,27 @@ void MainWindow::on_pushButtonUpdate_clicked()
     }
     updateTicket(tmpTicketInfo);
 
+    QMap<QString, QVector<QunarPriceInfo> > mapQunarPriceInfo;
     for(int i=0; i<m_vecPickServiceInfo.size(); i++)
     {
         if(m_vecPickServiceInfo[i].strTicketNo == tmpTicketInfo.strTicketNo)
         {
-            update2Qunaer(tmpTicketInfo, m_vecPickServiceInfo[i]);
+            QMap<QString, QVector<QunarPriceInfo> > mapTmpQunarPriceInfo;
+            getPriceInfo4Qunaer(tmpTicketInfo, m_vecPickServiceInfo[i], mapTmpQunarPriceInfo);
+            for(QMap<QString, QVector<QunarPriceInfo> >::iterator iter = mapTmpQunarPriceInfo.begin();
+                iter != mapTmpQunarPriceInfo.end(); iter++)
+            {
+                QVector<QunarPriceInfo> &vecQunarPriceInfo = mapQunarPriceInfo[iter.key()];
+                QVector<QunarPriceInfo> &vecTmpQuanrPriceInfo = iter.value();
+                for(int index=0; index<vecTmpQuanrPriceInfo.size(); index++)
+                {
+                    vecQunarPriceInfo.push_back(vecTmpQuanrPriceInfo[index]);
+                }
+            }
         }
     }
+    update2Qunaer(mapQunarPriceInfo);
+
     m_pPriceEditor->clearUpdateFlag();
 
 }
@@ -701,13 +715,26 @@ void MainWindow::on_pushButton_ServiceUpdate_clicked()
     }
     updatePickService(tmpPickServiceInfo);
 
+    QMap<QString, QVector<QunarPriceInfo> > mapQunarPriceInfo;
     for(int i=0; i<m_vecTicketInfo.size(); i++)
     {
         if(tmpPickServiceInfo.strTicketNo == m_vecTicketInfo[i].strTicketNo)
         {
-            update2Qunaer(m_vecTicketInfo[i], tmpPickServiceInfo);
+            QMap<QString, QVector<QunarPriceInfo> > mapTmpQunarPriceInfo;
+            getPriceInfo4Qunaer(m_vecTicketInfo[i], tmpPickServiceInfo, mapTmpQunarPriceInfo);
+            for(QMap<QString, QVector<QunarPriceInfo> >::iterator iter = mapTmpQunarPriceInfo.begin();
+                iter != mapTmpQunarPriceInfo.end(); iter++)
+            {
+                QVector<QunarPriceInfo> &vecQunarPriceInfo = mapQunarPriceInfo[iter.key()];
+                QVector<QunarPriceInfo> &vecTmpQuanrPriceInfo = iter.value();
+                for(int index=0; index<vecTmpQuanrPriceInfo.size(); index++)
+                {
+                    vecQunarPriceInfo.push_back(vecTmpQuanrPriceInfo[index]);
+                }
+            }
         }
     }
+    update2Qunaer(mapQunarPriceInfo);
     m_pPickServicePriceEditor->clearUpdateFlag();
 }
 
@@ -1782,7 +1809,7 @@ void MainWindow::clearChannelRelationDetailUI()
     ui->lineEdit_ShopProductName->clear();
 }
 
-void MainWindow::update2Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pickServiceInfo)
+void MainWindow::getPriceInfo4Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pickServiceInfo, QMap<QString, QVector<QunarPriceInfo> > &mapQunarPriceInfo)
 {
     QVector<QunarPriceInfo> vecQunerPriceInfo;
     for(QMap<QString, QMap<QString, TicketPriceInfo> >::iterator iterMapTicketPriceInfo = ticketInfo.mapTicketPriceInfo.begin();
@@ -1890,11 +1917,11 @@ void MainWindow::update2Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pickServ
             //找到渠道名，找到HTTP对象进行登录
             if(m_vecChannelInfo[i].strChannelName == iterTmp.key())
             {
-                for(int indexHttp=0; indexHttp!=m_vecQunerHttPtr.size(); indexHttp++)
+                /*for(int indexHttp=0; indexHttp!=m_vecQunerHttPtr.size(); indexHttp++)
                 {
                     if(m_vecQunerHttPtr[indexHttp]->GetUserName() == m_vecChannelInfo[i].strAccount
                     && m_vecQunerHttPtr[indexHttp]->GetChannelName() == m_vecChannelInfo[i].strChannelName)
-                    {
+                    {*/
                         QVector<QunarPriceInfo> vecUpdatePriceInfo;
                         QVector<QunarPriceInfo> vecQunerPriceInfoTmp = vecQunerPriceInfo;
                         QVector<ChannelRelationInfo> vecTmpChannelRelationInfo = iterTmp.value();
@@ -1906,6 +1933,37 @@ void MainWindow::update2Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pickServ
                                 vecUpdatePriceInfo.push_back(vecQunerPriceInfoTmp[index]);
                             }
                         }
+                        mapQunarPriceInfo[iterTmp.key()] = vecUpdatePriceInfo;
+                        /*if(vecUpdatePriceInfo.size() != 0)
+                        {
+                            m_vecQunerHttPtr[indexHttp]->setQunarPrice4Update(vecUpdatePriceInfo);
+                            qDebug() << "帐号：" << m_vecQunerHttPtr[indexHttp]->GetUserName()
+                                     << " 密码：" << m_vecQunerHttPtr[indexHttp]->GetChannelName() << endl;
+                            m_vecQunerHttPtr[indexHttp]->login();
+                        }
+                    }
+                }*/
+            }
+        }
+    }
+}
+
+void MainWindow::update2Qunaer(QMap<QString, QVector<QunarPriceInfo> > mapQunarPriceInfo)
+{
+    for(QMap<QString, QVector<QunarPriceInfo> >::iterator iter = mapQunarPriceInfo.begin();
+        iter != mapQunarPriceInfo.end(); iter++)
+    {
+        for(int i=0; i<m_vecChannelInfo.size(); i++)
+        {
+            //找到渠道名，找到HTTP对象进行登录
+            if(m_vecChannelInfo[i].strChannelName == iter.key())
+            {
+                for(int indexHttp=0; indexHttp!=m_vecQunerHttPtr.size(); indexHttp++)
+                {
+                    if(m_vecQunerHttPtr[indexHttp]->GetUserName() == m_vecChannelInfo[i].strAccount
+                    && m_vecQunerHttPtr[indexHttp]->GetChannelName() == m_vecChannelInfo[i].strChannelName)
+                    {
+                        QVector<QunarPriceInfo> &vecUpdatePriceInfo = iter.value();
                         if(vecUpdatePriceInfo.size() != 0)
                         {
                             m_vecQunerHttPtr[indexHttp]->setQunarPrice4Update(vecUpdatePriceInfo);
