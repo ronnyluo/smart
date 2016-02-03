@@ -128,6 +128,8 @@ private:
     //更新去哪儿网数据
     void update2Qunaer(QMap<QString, QVector<QunarPriceInfo> > mapQunarPriceInfo);
 
+    void checkTicketInfo(QMap<QString, QMap<QString, TicketPriceInfo> > &mapTicketPriceInfo);
+
 private:
     Ui::MainWindow *ui;
     QVector<TicketInfo> m_vecTicketInfo;

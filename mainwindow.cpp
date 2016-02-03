@@ -1005,6 +1005,7 @@ void MainWindow::replyFinishedForLoadTicket()
             QJsonObject jsonObject = docTicket.object();
             TicketInfo ticketInfo;
             ticketInfo.readFrom(jsonObject);
+            checkTicketInfo(ticketInfo.mapTicketPriceInfo);
             m_vecTicketInfo.push_back(ticketInfo);
         }
     }
@@ -1016,6 +1017,45 @@ void MainWindow::replyFinishedForLoadTicket()
     qDebug() << "m_vecTicketInfo.szie():" << m_vecTicketInfo.size();
     updateTicketUI();
     pNetworkReply->deleteLater();
+}
+
+//校验删除一个星期之前的过期数据
+void MainWindow::checkTicketInfo(QMap<QString, QMap<QString, TicketPriceInfo> > &mapTicketPriceInfo)
+{
+    for(QMap<QString, QMap<QString, TicketPriceInfo> >::iterator iterMapTicketPriceInfo = mapTicketPriceInfo.begin();
+        iterMapTicketPriceInfo!=mapTicketPriceInfo.end(); )
+    {
+        bool bEarse = false;
+        QString strYearMonth = iterMapTicketPriceInfo.key();
+        if(strYearMonth.size() >= 4)
+        {
+            int nYear = strYearMonth.left(4).toInt();
+            QString strYearMonthBak = strYearMonth;
+            int nMonth = strYearMonthBak.remove(0, 4).toInt();
+
+            QDate date = QDate::currentDate();
+            int nCurYear = date.year();
+            int nCurMonth = date.month();
+            if(nYear < nCurYear || ((nYear==nCurYear) && (nMonth<nCurMonth)))
+            {
+                bEarse = true;
+            }
+        }
+        else
+        {
+            bEarse = true;
+        }
+
+        if(true == bEarse)
+        {
+            iterMapTicketPriceInfo = mapTicketPriceInfo.erase(iterMapTicketPriceInfo);
+        }
+        else
+        {
+            iterMapTicketPriceInfo ++;
+        }
+    }
+
 }
 
 void MainWindow::replyFinishedForLoadPickService()
@@ -1039,6 +1079,7 @@ void MainWindow::replyFinishedForLoadPickService()
             QJsonObject jsonObject = docService.object();
             PickServiceInfo pickServiceInfo;
             pickServiceInfo.readFrom(jsonObject);
+            checkTicketInfo(pickServiceInfo.mapTicketPriceInfo);
             m_vecPickServiceInfo.push_back(pickServiceInfo);
         }
     }
