@@ -66,6 +66,7 @@ private slots:
     void channelCurrentItemClicked(QTableWidgetItem *tableWidgetItem);
     void channelRelationCurrentItemClicked(QTableWidgetItem *tableWidgetItem);
     void channelServiceListCurrentItemClicked(QTableWidgetItem *tableWidgetItem);
+    void productListCurrentItemClicked(QTableWidgetItem *tableWidgetItem);
     void findChannelServiceChanged(QString strFindName);
 
     void tabWidgetCurrentChanged(int index);
@@ -77,10 +78,16 @@ private slots:
 
     void saveSignalsSlot(PriceEditorMode eMode);
 
+    void on_pushButton_ProductUpdate_clicked();
+    void on_pushButton_ProductCancel_clicked();
+    void fillProductInfo(ProductInfo &productInfo);
+    void findProductInfoChanged(QString strFindName);
+
 private:
     void addItemToTicketList(TicketInfo& ticketInfo);
     bool hasSameTicketNo(QString ticketNo);
     bool hasSameServiceNo(QString serviceNo);
+    bool hasSameProductNo(QString productNo);
     void updateTicketUI(TicketInfo & ticketInfo);
     void clearTicketUI();
 
@@ -130,6 +137,9 @@ private:
 
     void checkTicketInfo(QMap<QString, QMap<QString, TicketPriceInfo> > &mapTicketPriceInfo);
 
+    void updateProductList(QVector<ProductInfo> &vecProductInfo);
+    void addItemToProductList(ProductInfo &productInfo);
+
 private:
     Ui::MainWindow *ui;
     QVector<TicketInfo> m_vecTicketInfo;
@@ -143,6 +153,8 @@ private:
     QMap<QString, QVector<ChannelRelationInfo> > m_mapChannelRelationInfo;  //渠道关联信息，key为渠道名称
     QNetworkAccessManager *m_pAssitNetworkManager;
     QVector<QunerHttp*> m_vecQunerHttPtr;
+
+    QVector<ProductInfo> m_vecProductInfo;
 };
 
 #endif // MAINWINDOW_H

@@ -9,15 +9,17 @@
 #include <QVector>
 
 //调试时使用
-//const QString QSS_CONFIG_FILE_PATH = "../smart/stylesheet.txt";
-//const QString PICTURE_FILE_PATH = "../smart/picture.png";
+const QString QSS_CONFIG_FILE_PATH = "../smart/stylesheet.txt";
+const QString PICTURE_FILE_PATH = "../smart/picture.png";
 
-//const QString SERVER_DOMAIN = "http://58.251.206.224:3000";
-const QString SERVER_DOMAIN = "http://cooktraver.aliapp.com";
+const QString SERVER_DOMAIN = "http://58.251.206.224:3000";
+
+//南京远界国际旅行社有限公司
+//const QString SERVER_DOMAIN = "http://cooktraver.aliapp.com";
 
 //编译发布时使用
-const QString QSS_CONFIG_FILE_PATH = "stylesheet.txt";
-const QString PICTURE_FILE_PATH = "picture.png";
+//const QString QSS_CONFIG_FILE_PATH = "stylesheet.txt";
+//const QString PICTURE_FILE_PATH = "picture.png";
 
 //票价信息
 //1机票票价：nTicketAdultPrice（成人票价），nTicketChildPrice（儿童票价）
@@ -164,7 +166,7 @@ typedef struct TicketInfo
 
 //地接模块
 
-//地接产品信息
+//地接产品信息，团号和机票产品编号废弃，有产品信息去关联
 typedef struct PickServiceInfo
 {
     QString strDeparture;                      //地接服务出发地
@@ -254,6 +256,74 @@ typedef struct PickServiceInfo
         }
     }
 }PickServiceInfoStruct;
+
+//产品信息:主要用于关联机票信息，地接信息，团号，完整路线信息
+typedef struct ProductInfo
+{
+    QString strDeparture;                      //产品出发地
+    QString strDestination;                    //产品目的地
+    QString strDays;                           //产品往返天数
+    QString strNo;                             //产品编号（系统生成）
+    QString strName;                           //产品名称
+    QString strMissionNo;                      //产品服务团号
+    QString strTicketNo;                       //产品关联的机票编号
+    QString strServiceNo;                      //产品关联的地接编号
+    QJsonObject& writeTo(QJsonObject & jsonObject)const
+    {
+        jsonObject.insert(QString("Departure"), QJsonValue(strDeparture));
+        jsonObject.insert(QString("Destination"), QJsonValue(strDestination));
+        jsonObject.insert(QString("Days"), QJsonValue(strDays));
+        jsonObject.insert(QString("No"), QJsonValue(strNo));
+        jsonObject.insert(QString("Name"), QJsonValue(strName));
+        jsonObject.insert(QString("MissionNo"), QJsonValue(strMissionNo));
+        jsonObject.insert(QString("TicketNo"), QJsonValue(strTicketNo));
+        jsonObject.insert(QString("ServiceNo"), QJsonValue(strServiceNo));
+        return jsonObject;
+    }
+    void readFrom(QJsonObject & jsonObject)
+    {
+        QJsonValue jsonValue = jsonObject.value(QString("Departure"));
+        if (!jsonValue.isUndefined())
+        {
+            strDeparture = jsonValue.toString();
+        }
+        jsonValue = jsonObject.value(QString("Destination"));
+        if (!jsonValue.isUndefined())
+        {
+            strDestination = jsonValue.toString();
+        }
+        jsonValue = jsonObject.value(QString("Days"));
+        if (!jsonValue.isUndefined())
+        {
+            strDays = jsonValue.toString();
+        }
+        jsonValue = jsonObject.value(QString("No"));
+        if (!jsonValue.isUndefined())
+        {
+            strNo = jsonValue.toString();
+        }
+        jsonValue = jsonObject.value(QString("Name"));
+        if (!jsonValue.isUndefined())
+        {
+            strName = jsonValue.toString();
+        }
+        jsonValue = jsonObject.value(QString("MissionNo"));
+        if (!jsonValue.isUndefined())
+        {
+            strMissionNo = jsonValue.toString();
+        }
+        jsonValue = jsonObject.value(QString("TicketNo"));
+        if (!jsonValue.isUndefined())
+        {
+            strTicketNo = jsonValue.toString();
+        }
+        jsonValue = jsonObject.value(QString("ServiceNo"));
+        if (!jsonValue.isUndefined())
+        {
+            strServiceNo = jsonValue.toString();
+        }
+    }
+}ProductInfoStruct;
 
 //渠道管理
 typedef struct ChannelInfo

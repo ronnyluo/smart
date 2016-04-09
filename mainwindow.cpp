@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-
+    ui->setupUi(this);
     m_pAssitNetworkManager = new QNetworkAccessManager(this);
 
     loadTicket();
@@ -21,7 +21,10 @@ MainWindow::MainWindow(QWidget *parent) :
     loadChannel();
     loadChannelRelation();
 
-    ui->setupUi(this);
+    //后面放到load之后
+    updateProductList(m_vecProductInfo);
+
+
 
     resize(QSize(900, 600));
     ui->listWidget_Ticket->setAlternatingRowColors(true);
@@ -56,6 +59,10 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->lineEdit_ServiceName->setReadOnly(true);
     ui->lineEdit_ServiceNo->setReadOnly(true);
 
+    //产品模块
+    ui->lineEdit_ProductNo->setReadOnly(true);
+    connect(ui->lineEdit_ProductFind, SIGNAL(textChanged(QString)), this, SLOT(findProductInfoChanged(QString)));
+
     connect(ui->listWidget_Service, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), this, SLOT(serviceCurrentItemChanged(QListWidgetItem *, QListWidgetItem *)));
     connect(ui->listWidget_Service, SIGNAL(itemClicked(QListWidgetItem *)), this, SLOT(serviceItemClicked(QListWidgetItem *)));
     connect(ui->lineEdit_ServiceDeparture, SIGNAL(textChanged(QString)), this, SLOT(serviceInfoChanged()));
@@ -76,6 +83,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->tableWidget_ChannelRelation, SIGNAL(itemClicked(QTableWidgetItem *)), this, SLOT(channelRelationCurrentItemClicked(QTableWidgetItem *)));
 
     connect(ui->tableWidget_ChannelServiceList, SIGNAL(itemClicked(QTableWidgetItem *)), this, SLOT(channelServiceListCurrentItemClicked(QTableWidgetItem *)));
+
+    connect(ui->tableWidget_ProductList, SIGNAL(itemClicked(QTableWidgetItem *)), this, SLOT(productListCurrentItemClicked(QTableWidgetItem *)));
 
     //渠道暂时不需要搜索功能
     ui->label_ChannelFind->hide();
@@ -115,10 +124,10 @@ void MainWindow::tabWidgetCurrentChanged(int index)
         break;
     case 2:
         break;
-    case 3:
+    case 4:
         updateChannelListUI();
         break;
-    case 4:
+    case 5:
         updateChannelRelationUI();
         break;
     default:
@@ -274,6 +283,25 @@ void MainWindow::findChannelServiceChanged(QString strFindName)
 
     //删除所有的Item
     addItemToChannelServiceList(vecFindPickServiceInfo);
+}
+
+void MainWindow::findProductInfoChanged(QString strFindName)
+{
+    QVector<ProductInfo> vecFindProductInfo;
+    for(int i=0; i<m_vecProductInfo.size(); i++)
+    {
+        if(m_vecProductInfo[i].strName.contains(strFindName, Qt::CaseInsensitive)
+                || m_vecProductInfo[i].strNo.contains(strFindName, Qt::CaseInsensitive)
+                || m_vecProductInfo[i].strServiceNo.contains(strFindName, Qt::CaseInsensitive)
+                || m_vecProductInfo[i].strTicketNo.contains(strFindName, Qt::CaseInsensitive)
+                || m_vecProductInfo[i].strMissionNo.contains(strFindName, Qt::CaseInsensitive))
+        {
+            vecFindProductInfo.push_back(m_vecProductInfo[i]);
+        }
+    }
+
+    qDebug() << vecFindProductInfo.size();
+    updateProductList(vecFindProductInfo);
 }
 
 void MainWindow::on_pushButtonUpdate_clicked()
@@ -460,6 +488,20 @@ bool MainWindow::hasSameServiceNo(QString serviceNo)
     for(int i=0; i<m_vecPickServiceInfo.size(); i++)
     {
         if(serviceNo == m_vecPickServiceInfo[i].strNo)
+        {
+            bHasSame = true;
+            break;
+        }
+    }
+    return bHasSame;
+}
+
+bool MainWindow::hasSameProductNo(QString productNo)
+{
+    bool bHasSame = false;
+    for(int i=0; i<m_vecProductInfo.size(); i++)
+    {
+        if(productNo == m_vecProductInfo[i].strNo)
         {
             bHasSame = true;
             break;
@@ -1630,6 +1672,37 @@ void MainWindow::channelServiceListCurrentItemClicked(QTableWidgetItem *tableWid
     ui->lineEdit_ShopProductName->setText(strServiceName);
 }
 
+void MainWindow::productListCurrentItemClicked(QTableWidgetItem *tableWidgetItem)
+{
+    if(m_vecProductInfo.size() == 0)
+    {
+        return;
+    }
+
+    int currentRow = ui->tableWidget_ProductList->row(tableWidgetItem);
+    QString strProductNo = ui->tableWidget_ProductList->item(currentRow, 0)->text();
+    int i=0;
+    for(i=0; i<m_vecProductInfo.size(); i++)
+    {
+        if(strProductNo == m_vecProductInfo[i].strNo)
+        {
+            break;
+        }
+    }
+
+    if(i != m_vecProductInfo.size())
+    {
+        ui->lineEdit_ProductDeparture->setText(m_vecProductInfo[i].strDeparture);
+        ui->lineEdit_ProductDestination->setText(m_vecProductInfo[i].strDestination);
+        ui->lineEdit_ProductDays->setText(m_vecProductInfo[i].strDays);
+        ui->lineEdit_ProductMissionNo->setText(m_vecProductInfo[i].strMissionNo);
+        ui->lineEdit_ProductName->setText(m_vecProductInfo[i].strName);
+        ui->lineEdit_ProductNo->setText(m_vecProductInfo[i].strNo);
+        ui->lineEdit_ProductServiceNo->setText(m_vecProductInfo[i].strServiceNo);
+        ui->lineEdit_ProductTicketNo->setText(m_vecProductInfo[i].strTicketNo);
+    }
+}
+
 void MainWindow::updateChannelRelationUI()
 {
     disconnect(ui->listWidget_ChannelList, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), 0, 0);
@@ -2030,3 +2103,178 @@ void MainWindow::saveSignalsSlot(PriceEditorMode eMode)
         on_pushButton_ServiceUpdate_clicked();
     }
 }
+
+void MainWindow::fillProductInfo(ProductInfo &productInfo)
+{
+    productInfo.strDeparture = ui->lineEdit_ProductDeparture->text();
+    productInfo.strDestination = ui->lineEdit_ProductDestination->text();
+    productInfo.strDays = ui->lineEdit_ProductDays->text();
+    productInfo.strMissionNo = ui->lineEdit_ProductMissionNo->text();
+    productInfo.strName = ui->lineEdit_ProductName->text();
+    productInfo.strNo = ui->lineEdit_ProductNo->text();
+    productInfo.strTicketNo = ui->lineEdit_ProductTicketNo->text();
+    productInfo.strServiceNo = ui->lineEdit_ProductServiceNo->text();
+}
+
+void MainWindow::on_pushButton_ProductUpdate_clicked()
+{
+    qDebug() << "on_pushButton_ProductUpdate_clicked";
+    ProductInfo tmpProductInfo;
+    fillProductInfo(tmpProductInfo);
+    if(NULL==tmpProductInfo.strDeparture
+      || NULL == tmpProductInfo.strDestination
+      || NULL == tmpProductInfo.strDays
+      || NULL == tmpProductInfo.strName
+      || NULL == tmpProductInfo.strMissionNo
+      || NULL == tmpProductInfo.strServiceNo
+      || NULL == tmpProductInfo.strTicketNo)
+    {
+        QMessageBox::information(NULL, QString("提醒"), QString("请输入完整的产品信息!"));
+        return;
+    }
+
+    /*if(!hasSameTicketNo(tmpProductInfo.strTicketNo))
+    {
+        QMessageBox::information(NULL, QString("提醒"), QString("请输入正确的机票编号!"));
+        return;
+    }
+
+    if(!hasSameServiceNo(tmpProductInfo.strServiceNo))
+    {
+        QMessageBox::information(NULL, QString("提醒"), QString("请输入正确的地接编号!"));
+        return;
+    }*/
+
+    bool bFind = false;
+    int i=0;
+    for(; i<m_vecProductInfo.size(); i++)
+    {
+        if(tmpProductInfo.strName == m_vecProductInfo[i].strName)
+        {
+            bFind = true;
+            break;
+        }
+    }
+
+    if(true == bFind)
+    {
+        QString strText = "是否修改" + tmpProductInfo.strName + "产品信息？";
+        QMessageBox::StandardButton reply = QMessageBox::question(this, "提醒", strText, QMessageBox::Yes | QMessageBox::No);
+        if(QMessageBox::Yes == reply)
+        {
+             m_vecProductInfo[i] = tmpProductInfo;
+        }
+        else
+        {
+            return;
+        }
+    }
+    else
+    {
+        QString strText = "是否添加" + tmpProductInfo.strName + "产品信息？";
+        QMessageBox::StandardButton reply = QMessageBox::question(this, "提醒", strText, QMessageBox::Yes | QMessageBox::No);
+        if(QMessageBox::Yes == reply)
+        {
+            tmpProductInfo.strNo =  QString::number(QDateTime::currentDateTime().toTime_t(), 10);
+            qDebug() << tmpProductInfo.strNo;
+            if(hasSameProductNo(tmpProductInfo.strNo))
+            {
+                QMessageBox::information(NULL, QString("提醒"), QString("请不要在一秒中生成多个产品信息!"));
+                return;
+            }
+            ui->lineEdit_ProductNo->setText(tmpProductInfo.strNo);
+            m_vecProductInfo.push_back(tmpProductInfo);
+            addItemToProductList(tmpProductInfo);
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    //向后台更新产品信息
+    //updateProductInfo(tmpProductInfo);
+
+}
+
+void MainWindow::on_pushButton_ProductCancel_clicked()
+{
+    qDebug() << "on_pushButton_ProductCancel_clicked";
+    ui->lineEdit_ProductDeparture->setText("");
+    ui->lineEdit_ProductDestination->setText("");
+    ui->lineEdit_ProductDays->setText("");
+    ui->lineEdit_ProductMissionNo->setText("");
+    ui->lineEdit_ProductName->setText("");
+    ui->lineEdit_ProductNo->setText("");
+    ui->lineEdit_ProductServiceNo->setText("");
+    ui->lineEdit_ProductTicketNo->setText("");
+}
+
+void MainWindow::addItemToProductList(ProductInfo &productInfo)
+{
+    ui->tableWidget_ProductList->horizontalHeader()->resizeSections(QHeaderView::Stretch);
+    int tmpRowCount = ui->tableWidget_ProductList->rowCount();
+    ui->tableWidget_ProductList->setRowCount(tmpRowCount+1);
+
+    QTableWidgetItem *itemProductID = new QTableWidgetItem(productInfo.strNo);
+    itemProductID->setTextAlignment(Qt::AlignHCenter);
+    ui->tableWidget_ProductList->setItem(tmpRowCount, 0, itemProductID);
+
+    QTableWidgetItem *itemProductName = new QTableWidgetItem(productInfo.strName);
+    itemProductName->setTextAlignment(Qt::AlignHCenter);
+    ui->tableWidget_ProductList->setItem(tmpRowCount, 1, itemProductName);
+
+    QTableWidgetItem *itemProductTicketNo = new QTableWidgetItem(productInfo.strTicketNo);
+    itemProductTicketNo->setTextAlignment(Qt::AlignHCenter);
+    ui->tableWidget_ProductList->setItem(tmpRowCount, 2, itemProductTicketNo);
+
+    QTableWidgetItem *itemProductServiceNo = new QTableWidgetItem(productInfo.strServiceNo);
+    itemProductServiceNo->setTextAlignment(Qt::AlignHCenter);
+    ui->tableWidget_ProductList->setItem(tmpRowCount, 3, itemProductServiceNo);
+
+    QTableWidgetItem *itemProductMissionNo = new QTableWidgetItem(productInfo.strMissionNo);
+    itemProductMissionNo->setTextAlignment(Qt::AlignHCenter);
+    ui->tableWidget_ProductList->setItem(tmpRowCount, 4, itemProductMissionNo);
+}
+
+void MainWindow::updateProductList(QVector<ProductInfo> &vecProductInfo)
+{
+    qDebug() << ui->tableWidget_ProductList;
+    int row = ui->tableWidget_ProductList->rowCount();
+    for(int i=0; i<row; i++)
+    {
+        ui->tableWidget_ProductList->removeRow(0);
+    }
+
+    ui->tableWidget_ProductList->setColumnCount(5);
+    ui->tableWidget_ProductList->setRowCount(vecProductInfo.size());
+    ui->tableWidget_ProductList->verticalHeader()->setVisible(false);
+    QStringList header;
+    header << "产品编号" << "产品名称" << "关联机票编号" << "关联地接编号" << "团号";
+    ui->tableWidget_ProductList->setHorizontalHeaderLabels(header);
+    ui->tableWidget_ProductList->horizontalHeader()->resizeSections(QHeaderView::Stretch);
+
+    for(int i=0; i<vecProductInfo.size(); i++)
+    {
+        QTableWidgetItem *itemProductID = new QTableWidgetItem(vecProductInfo[i].strNo);
+        itemProductID->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ProductList->setItem(i, 0, itemProductID);
+
+        QTableWidgetItem *itemProductName = new QTableWidgetItem(vecProductInfo[i].strName);
+        itemProductName->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ProductList->setItem(i, 1, itemProductName);
+
+        QTableWidgetItem *itemProductTicketNo = new QTableWidgetItem(vecProductInfo[i].strTicketNo);
+        itemProductTicketNo->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ProductList->setItem(i, 2, itemProductTicketNo);
+
+        QTableWidgetItem *itemProductServiceNo = new QTableWidgetItem(vecProductInfo[i].strServiceNo);
+        itemProductServiceNo->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ProductList->setItem(i, 3, itemProductServiceNo);
+
+        QTableWidgetItem *itemProductMissionNo = new QTableWidgetItem(vecProductInfo[i].strMissionNo);
+        itemProductMissionNo->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ProductList->setItem(i, 4, itemProductMissionNo);
+    }
+}
+
