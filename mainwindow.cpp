@@ -366,7 +366,32 @@ void MainWindow::on_pushButtonUpdate_clicked()
     updateTicket(tmpTicketInfo);
 
     QMap<QString, QVector<QunarPriceInfo> > mapQunarPriceInfo;
-    for(int i=0; i<m_vecPickServiceInfo.size(); i++)
+
+    for(int i=0; i<m_vecProductInfo.size(); i++)
+    {
+        if(m_vecProductInfo[i].strTicketNo == tmpTicketInfo.strTicketNo)
+        {
+            for(int j=0; j<m_vecPickServiceInfo.size(); j++)
+            {
+                if(m_vecPickServiceInfo[j].strNo == m_vecProductInfo[i].strServiceNo)
+                {
+                    QMap<QString, QVector<QunarPriceInfo> > mapTmpQunarPriceInfo;
+                    getPriceInfo4Qunaer(tmpTicketInfo, m_vecPickServiceInfo[j], mapTmpQunarPriceInfo);
+                    for(QMap<QString, QVector<QunarPriceInfo> >::iterator iter = mapTmpQunarPriceInfo.begin();
+                        iter != mapTmpQunarPriceInfo.end(); iter++)
+                    {
+                        QVector<QunarPriceInfo> &vecQunarPriceInfo = mapQunarPriceInfo[iter.key()];
+                        QVector<QunarPriceInfo> &vecTmpQuanrPriceInfo = iter.value();
+                        for(int index=0; index<vecTmpQuanrPriceInfo.size(); index++)
+                        {
+                            vecQunarPriceInfo.push_back(vecTmpQuanrPriceInfo[index]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /*for(int i=0; i<m_vecPickServiceInfo.size(); i++)
     {
         if(m_vecPickServiceInfo[i].strTicketNo == tmpTicketInfo.strTicketNo)
         {
@@ -383,7 +408,7 @@ void MainWindow::on_pushButtonUpdate_clicked()
                 }
             }
         }
-    }
+    }*/
     update2Qunaer(mapQunarPriceInfo);
 
     m_pPriceEditor->clearUpdateFlag();
@@ -758,7 +783,32 @@ void MainWindow::on_pushButton_ServiceUpdate_clicked()
     updatePickService(tmpPickServiceInfo);
 
     QMap<QString, QVector<QunarPriceInfo> > mapQunarPriceInfo;
-    for(int i=0; i<m_vecTicketInfo.size(); i++)
+
+    for(int i=0; i<m_vecProductInfo.size(); i++)
+    {
+        if(m_vecProductInfo[i].strServiceNo == tmpPickServiceInfo.strNo)
+        {
+            for(int j=0; j<m_vecTicketInfo.size(); j++)
+            {
+                if(m_vecTicketInfo[j].strTicketNo == m_vecProductInfo[i].strTicketNo)
+                {
+                    QMap<QString, QVector<QunarPriceInfo> > mapTmpQunarPriceInfo;
+                    getPriceInfo4Qunaer(m_vecTicketInfo[j], tmpPickServiceInfo, mapTmpQunarPriceInfo);
+                    for(QMap<QString, QVector<QunarPriceInfo> >::iterator iter = mapTmpQunarPriceInfo.begin();
+                        iter != mapTmpQunarPriceInfo.end(); iter++)
+                    {
+                        QVector<QunarPriceInfo> &vecQunarPriceInfo = mapQunarPriceInfo[iter.key()];
+                        QVector<QunarPriceInfo> &vecTmpQuanrPriceInfo = iter.value();
+                        for(int index=0; index<vecTmpQuanrPriceInfo.size(); index++)
+                        {
+                            vecQunarPriceInfo.push_back(vecTmpQuanrPriceInfo[index]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /*for(int i=0; i<m_vecTicketInfo.size(); i++)
     {
         if(tmpPickServiceInfo.strTicketNo == m_vecTicketInfo[i].strTicketNo)
         {
@@ -775,7 +825,7 @@ void MainWindow::on_pushButton_ServiceUpdate_clicked()
                 }
             }
         }
-    }
+    }*/
     update2Qunaer(mapQunarPriceInfo);
     m_pPickServicePriceEditor->clearUpdateFlag();
 }
@@ -2246,13 +2296,14 @@ void MainWindow::updateProductList(QVector<ProductInfo> &vecProductInfo)
         ui->tableWidget_ProductList->removeRow(0);
     }
 
+    ui->tableWidget_ProductList->horizontalHeader()->resizeSections(QHeaderView::Stretch);
     ui->tableWidget_ProductList->setColumnCount(5);
     ui->tableWidget_ProductList->setRowCount(vecProductInfo.size());
     ui->tableWidget_ProductList->verticalHeader()->setVisible(false);
     QStringList header;
     header << "产品编号" << "产品名称" << "关联机票编号" << "关联地接编号" << "团号";
     ui->tableWidget_ProductList->setHorizontalHeaderLabels(header);
-    ui->tableWidget_ProductList->horizontalHeader()->resizeSections(QHeaderView::Stretch);
+
 
     for(int i=0; i<vecProductInfo.size(); i++)
     {
