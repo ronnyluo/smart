@@ -50,7 +50,7 @@ private slots:
     void replyFinishedForPickService();
     void replyUpdateChannel();
     void replyUpdateChannelRelation();
-
+    void replyFinishedForProduct();
 
     void replyFinishedForLoadTicket();
     void replyFinishedForLoadPickService();
@@ -83,6 +83,7 @@ private slots:
     void fillProductInfo(ProductInfo &productInfo);
     void findProductInfoChanged(QString strFindName);
 
+    void replyFinishedForLoadProduct();
 private:
     void addItemToTicketList(TicketInfo& ticketInfo);
     bool hasSameTicketNo(QString ticketNo);
@@ -101,11 +102,13 @@ private:
     void updatePickService(const PickServiceInfo & pickServiceInfo);
     void updateChannel(const ChannelInfo & channelInfo);
     void updateChannelRelation(const ChannelRelationInfo & channelRelationInfo);
+    void updateProduct(const ProductInfo & productInfo);
 
     void loadTicket();
     void loadPickServce();
     void loadChannel();
     void loadChannelRelation();
+    void loadProduct();
 
     void deleteChannel(const QString & strChannelName);
     void deleteChannelRelation(const QString & strChannelName, const QString & strProductId);

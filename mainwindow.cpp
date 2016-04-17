@@ -20,10 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     loadPickServce();
     loadChannel();
     loadChannelRelation();
-
-    //后面放到load之后
-    updateProductList(m_vecProductInfo);
-
+    loadProduct();
 
 
     resize(QSize(900, 600));
@@ -2243,7 +2240,7 @@ void MainWindow::on_pushButton_ProductUpdate_clicked()
     }
 
     //向后台更新产品信息
-    //updateProductInfo(tmpProductInfo);
+    updateProduct(tmpProductInfo);
 
 }
 
@@ -2329,3 +2326,123 @@ void MainWindow::updateProductList(QVector<ProductInfo> &vecProductInfo)
     }
 }
 
+void MainWindow::loadProduct()
+{
+    QByteArray postData;
+    postData.append("op=load&");
+
+    QNetworkRequest networkRequest;
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+    networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
+    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/product.cgi"));
+
+    QNetworkReply *pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyFinishedForLoadProduct()));
+}
+
+void MainWindow::replyFinishedForLoadProduct()
+{
+    QNetworkReply* pNetworkReply = qobject_cast<QNetworkReply*>(sender());
+
+    //获取响应的信息，状态码为200表示正常
+    QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    //无错误返回
+    if(pNetworkReply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = pNetworkReply->readAll();  //获取字节
+        QJsonDocument document = QJsonDocument::fromJson(bytes);
+        QJsonArray jsonArray = document.array();
+        for (QJsonArray::iterator it = jsonArray.begin(); it != jsonArray.end(); ++it)
+        {
+            QString sProduct = (*it).toObject()["product_info"].toString();
+            QJsonParseError jsonParseErr;
+            QJsonDocument docTicket = QJsonDocument::fromJson(sProduct.toUtf8(), &jsonParseErr);
+            QJsonObject jsonObject = docTicket.object();
+            ProductInfo productInfo;
+            productInfo.readFrom(jsonObject);
+            m_vecProductInfo.push_back(productInfo);
+        }
+    }
+    else
+    {
+        //处理错误
+        QMessageBox::information(NULL, QString("错误"), status.toString());
+    }
+    qDebug() << "m_vecTicketInfo.szie():" << m_vecProductInfo.size();
+    //后面放到load之后
+    updateProductList(m_vecProductInfo);
+
+
+
+    pNetworkReply->deleteLater();
+}
+
+
+void MainWindow::updateProduct(const ProductInfo & productInfo)
+{
+    if (productInfo.strNo.isEmpty())
+    {
+        QMessageBox::information(NULL, QString("错误"), QString("产品ID不能为空"));
+        return ;
+    }
+    QJsonObject jsonObject;
+    productInfo.writeTo(jsonObject);
+    QJsonDocument jsonDocument(jsonObject);
+    QByteArray postData;
+    postData.append("op=update&");
+    postData.append("product_no=").append(productInfo.strNo);
+    postData.append("&product_info=").append(jsonDocument.toJson());
+
+    QNetworkRequest networkRequest;
+    networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+    networkRequest.setHeader(QNetworkRequest::ContentLengthHeader, postData.length());
+    networkRequest.setUrl(QUrl(SERVER_DOMAIN + "/product.cgi"));
+
+    QNetworkReply* pNetworkReply = m_pAssitNetworkManager->post(networkRequest, postData);
+    connect(pNetworkReply, SIGNAL(finished()), this, SLOT(replyFinishedForProduct()));
+}
+
+void MainWindow::replyFinishedForProduct()
+{
+    QNetworkReply *pNetworkReply = qobject_cast<QNetworkReply*>(sender());
+
+    //获取响应的信息，状态码为200表示正常
+    QVariant status = pNetworkReply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+    //无错误返回
+    if(pNetworkReply->error() == QNetworkReply::NoError)
+    {
+        QByteArray bytes = pNetworkReply->readAll();  //获取字节
+        QJsonDocument document = QJsonDocument::fromJson(bytes);
+        QJsonObject jsonObject = document.object();
+        QJsonValue jsonValue = jsonObject.value(QString("ret"));
+        if (jsonValue.isUndefined())
+        {
+            QMessageBox::information(NULL, QString("错误"), QString("返回json错误!"));
+        }
+        if (0 == jsonValue.toDouble())
+        {
+             QMessageBox::information(NULL, QString("提示"), QString("更新产品信息成功"));
+        }
+        else
+        {
+            jsonValue = jsonObject.value(QString("msg"));
+            if (jsonValue.isUndefined())
+            {
+                  QMessageBox::information(NULL, QString("错误"), QString("更新产品信息错误!"));
+            }
+            else
+            {
+                 QMessageBox::information(NULL, QString("错误"), QString("更新产品信息错误!").append(jsonValue.toString()));
+            }
+        }
+
+    }
+    else
+    {
+        //处理错误
+        QMessageBox::information(NULL, QString("错误"), status.toString());
+    }
+
+}
