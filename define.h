@@ -13,10 +13,10 @@ const QString QSS_CONFIG_FILE_PATH = "../smart/stylesheet.txt";
 const QString PICTURE_FILE_PATH = "../smart/picture.png";
 
 //const QString SERVER_DOMAIN = "http://58.251.206.224:3000";
-const QString SERVER_DOMAIN = "http://nicecook.jios.org:10001";
+//const QString SERVER_DOMAIN = "http://nicecook.jios.org:10001";
 
 //南京远界国际旅行社有限公司
-//const QString SERVER_DOMAIN = "http://cooktraver.aliapp.com";
+const QString SERVER_DOMAIN = "http://112.74.126.242";
 
 //编译发布时使用
 //const QString QSS_CONFIG_FILE_PATH = "stylesheet.txt";
