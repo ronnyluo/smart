@@ -22,6 +22,9 @@ const QString SERVER_DOMAIN = "http://112.74.126.242";
 //const QString QSS_CONFIG_FILE_PATH = "stylesheet.txt";
 //const QString PICTURE_FILE_PATH = "picture.png";
 
+
+#define ITEM_NUM_OF_PAGE 50
+
 //票价信息
 //1机票票价：nTicketAdultPrice（成人票价），nTicketChildPrice（儿童票价）
 //2地接服务票价：nTicketAdultPrice（成人票价），nTicketChildPrice（儿童票价）,nSigleRoomSpread（单房差）

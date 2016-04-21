@@ -158,6 +158,8 @@ private:
     QVector<QunerHttp*> m_vecQunerHttPtr;
 
     QVector<ProductInfo> m_vecProductInfo;
+    int m_iLoadPage;
+
 };
 
 #endif // MAINWINDOW_H

@@ -13,14 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    m_iLoadPage = 0;
     ui->setupUi(this);
     m_pAssitNetworkManager = new QNetworkAccessManager(this);
 
     loadTicket();
-    loadPickServce();
-    loadChannel();
-    loadChannelRelation();
-    loadProduct();
 
 
     resize(QSize(900, 600));
@@ -1047,7 +1044,7 @@ void MainWindow::replyFinishedForPickService()
 void MainWindow::loadTicket()
 {
     QByteArray postData;
-    postData.append("op=load&");
+    postData.append("op=load&page=").append(QByteArray::number(m_iLoadPage));
 
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -1061,7 +1058,7 @@ void MainWindow::loadTicket()
 void MainWindow::loadPickServce()
 {
     QByteArray postData;
-    postData.append("op=load&");
+    postData.append("op=load&page=").append(QByteArray::number(m_iLoadPage));
 
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -1097,6 +1094,17 @@ void MainWindow::replyFinishedForLoadTicket()
             checkTicketInfo(ticketInfo.mapTicketPriceInfo);
             m_vecTicketInfo.push_back(ticketInfo);
         }
+        m_iLoadPage++;
+        if (jsonArray.size() < ITEM_NUM_OF_PAGE)
+        {
+            updateTicketUI();
+            m_iLoadPage = 0;
+            loadPickServce();
+        }
+        else
+        {
+            loadTicket();
+        }
     }
     else
     {
@@ -1104,7 +1112,6 @@ void MainWindow::replyFinishedForLoadTicket()
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
     qDebug() << "m_vecTicketInfo.szie():" << m_vecTicketInfo.size();
-    updateTicketUI();
     pNetworkReply->deleteLater();
 }
 
@@ -1171,6 +1178,17 @@ void MainWindow::replyFinishedForLoadPickService()
             checkTicketInfo(pickServiceInfo.mapTicketPriceInfo);
             m_vecPickServiceInfo.push_back(pickServiceInfo);
         }
+        m_iLoadPage++;
+        if (jsonArray.size() < ITEM_NUM_OF_PAGE)
+        {
+            m_iLoadPage = 0;
+            updatePickServiceUI();
+            loadChannel();
+        }
+        else
+        {
+            loadPickServce();
+        }
     }
     else
     {
@@ -1178,7 +1196,6 @@ void MainWindow::replyFinishedForLoadPickService()
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
     qDebug() << "m_vecPickServiceInfo.size()" << m_vecPickServiceInfo.size();
-    updatePickServiceUI();
     pNetworkReply->deleteLater();
 }
 
@@ -1327,7 +1344,7 @@ void MainWindow::replyUpdateChannelRelation()
 void MainWindow::loadChannel()
 {
     QByteArray postData;
-    postData.append("op=load&");
+    postData.append("op=load&page=").append(QByteArray::number(m_iLoadPage));
 
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
@@ -1341,7 +1358,7 @@ void MainWindow::loadChannel()
 void MainWindow::loadChannelRelation()
 {
     QByteArray postData;
-    postData.append("op=load&");
+    postData.append("op=load&page=").append(QByteArray::number(m_iLoadPage));
 
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded;charset=UTF-8");
@@ -1375,6 +1392,18 @@ void MainWindow::replyLoadChannel()
             channelInfo.readFrom(jsonObject);
             m_vecChannelInfo.push_back(channelInfo);
         }
+        m_iLoadPage++;
+        if (jsonArray.size() < ITEM_NUM_OF_PAGE)
+        {
+            m_iLoadPage = 0;
+            updateChannelListUI();
+            loadChannelRelation();
+        }
+        else
+        {
+           loadChannel();
+        }
+
     }
     else
     {
@@ -1411,6 +1440,16 @@ void MainWindow::replyLoadChannelRelation()
             ChannelRelationInfo channelRelationInfo;
             channelRelationInfo.readFrom(jsonObject);
             m_mapChannelRelationInfo[channelRelationInfo.strChannelName].push_back(channelRelationInfo);
+        }
+        m_iLoadPage++;
+        if (jsonArray.size() < ITEM_NUM_OF_PAGE)
+        {
+            m_iLoadPage = 0;
+            loadProduct();
+        }
+        else
+        {
+            loadChannelRelation();
         }
         //updateChannelRelationDetailUI(strChannelName);
     }
@@ -2329,7 +2368,7 @@ void MainWindow::updateProductList(QVector<ProductInfo> &vecProductInfo)
 void MainWindow::loadProduct()
 {
     QByteArray postData;
-    postData.append("op=load&");
+    postData.append("op=load&page=").append(QByteArray::number(m_iLoadPage));
 
     QNetworkRequest networkRequest;
     networkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -2369,7 +2408,7 @@ void MainWindow::replyFinishedForLoadProduct()
         //处理错误
         QMessageBox::information(NULL, QString("错误"), status.toString());
     }
-    qDebug() << "m_vecTicketInfo.szie():" << m_vecProductInfo.size();
+    qDebug() << "m_vecProductInfo.szie():" << m_vecProductInfo.size();
     //后面放到load之后
     updateProductList(m_vecProductInfo);
 
