@@ -12,15 +12,17 @@
 const QString QSS_CONFIG_FILE_PATH = "../smart/stylesheet.txt";
 const QString PICTURE_FILE_PATH = "../smart/picture.png";
 
-//const QString SERVER_DOMAIN = "http://58.251.206.224:3000";
-//const QString SERVER_DOMAIN = "http://nicecook.jios.org:10001";
-
-//南京远界国际旅行社有限公司
-const QString SERVER_DOMAIN = "http://120.25.217.221";
-
 //编译发布时使用
 //const QString QSS_CONFIG_FILE_PATH = "stylesheet.txt";
 //const QString PICTURE_FILE_PATH = "picture.png";
+
+//const QString SERVER_DOMAIN = "http://58.251.206.224:3000";
+const QString SERVER_DOMAIN = "http://nicecook.jios.org:10001";
+const QString COMPANY_NAME = "测试客户端";
+
+//南京远界国际旅行社有限公司
+//const QString SERVER_DOMAIN = "http://120.25.217.221";
+//const QString COMPANY_NAME = "南京远界国际旅行社有限公司";
 
 
 #define ITEM_NUM_OF_PAGE 50
