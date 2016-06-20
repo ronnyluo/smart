@@ -20,8 +20,6 @@ const QString SERVER_DOMAIN = "http://121.42.158.27";
 //const QString QSS_CONFIG_FILE_PATH = "stylesheet.txt";
 //const QString PICTURE_FILE_PATH = "picture.png";
 
-//const QString SERVER_DOMAIN = "http://58.251.206.224:3000";
-const QString SERVER_DOMAIN = "http://nicecook.jios.org:10001";
 const QString COMPANY_NAME = "测试客户端";
 
 //南京远界国际旅行社有限公司

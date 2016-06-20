@@ -2403,6 +2403,12 @@ void MainWindow::replyFinishedForLoadProduct()
             productInfo.readFrom(jsonObject);
             m_vecProductInfo.push_back(productInfo);
         }
+        m_iLoadPage++;
+        if (jsonArray.size() >= ITEM_NUM_OF_PAGE)
+        {
+            loadProduct();
+        }
+
     }
     else
     {
