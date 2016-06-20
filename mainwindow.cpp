@@ -1086,6 +1086,7 @@ void MainWindow::replyFinishedForLoadTicket()
         for (QJsonArray::iterator it = jsonArray.begin(); it != jsonArray.end(); ++it)
         {
             QString sTicket = (*it).toObject()["ticket_info"].toString();
+            qDebug() << "sTicket：" << sTicket << endl;
             QJsonParseError jsonParseErr;
             QJsonDocument docTicket = QJsonDocument::fromJson(sTicket.toUtf8(), &jsonParseErr);
             QJsonObject jsonObject = docTicket.object();
