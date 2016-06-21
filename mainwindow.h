@@ -97,6 +97,7 @@ private:
     void updateServiceUI(PickServiceInfo& serviceInfo);
 
     void addItemToChannelServiceList(QVector<PickServiceInfo> &vecPickServiceInfo);
+    void addItemToChannelServiceList(QVector<ProductInfo> &vecProductInfo);
 
     void updateTicket(const TicketInfo & ticketInfo);
     void updatePickService(const PickServiceInfo & pickServiceInfo);
@@ -133,7 +134,7 @@ private:
     void getAnswer(QString& jsFunc, QString& answer, QString& cookie);
 
     //获取更新去哪儿网的数据
-    void getPriceInfo4Qunaer(TicketInfo& ticketInfo, PickServiceInfo &pickServiceInfo, QMap<QString, QVector<QunarPriceInfo> > &mapQunarPriceInfo);
+    void getPriceInfo4Qunaer(TicketInfo& ticketInfo, PickServiceInfo &pickServiceInfo, ProductInfo &productInfo, QMap<QString, QVector<QunarPriceInfo> > &mapQunarPriceInfo);
 
     //更新去哪儿网数据
     void update2Qunaer(QMap<QString, QVector<QunarPriceInfo> > mapQunarPriceInfo);

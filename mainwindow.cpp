@@ -15,6 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     m_iLoadPage = 0;
     ui->setupUi(this);
+    setWindowTitle(COMPANY_NAME);
     m_pAssitNetworkManager = new QNetworkAccessManager(this);
 
     loadTicket();
@@ -263,20 +264,20 @@ void MainWindow::findServiceInfoChanged(QString strFindName)
 
 void MainWindow::findChannelServiceChanged(QString strFindName)
 {
-    QVector<PickServiceInfo> vecFindPickServiceInfo;
-    for(int i=0; i<m_vecPickServiceInfo.size(); i++)
+    QVector<ProductInfo> vecFindProductInfo;
+    for(int i=0; i<m_vecProductInfo.size(); i++)
     {
-        if(m_vecPickServiceInfo[i].strName.contains(strFindName, Qt::CaseInsensitive)
-                || m_vecPickServiceInfo[i].strMissionNo.contains(strFindName, Qt::CaseInsensitive)
-                || m_vecPickServiceInfo[i].strNo.contains(strFindName, Qt::CaseInsensitive))
+        if(m_vecProductInfo[i].strName.contains(strFindName, Qt::CaseInsensitive)
+                || m_vecProductInfo[i].strMissionNo.contains(strFindName, Qt::CaseInsensitive)
+                || m_vecProductInfo[i].strNo.contains(strFindName, Qt::CaseInsensitive))
         {
-            vecFindPickServiceInfo.push_back(m_vecPickServiceInfo[i]);
+            vecFindProductInfo.push_back(m_vecProductInfo[i]);
         }
     }
-    qDebug() << vecFindPickServiceInfo.size();
+    qDebug() << vecFindProductInfo.size();
 
     //删除所有的Item
-    addItemToChannelServiceList(vecFindPickServiceInfo);
+    addItemToChannelServiceList(vecFindProductInfo);
 }
 
 void MainWindow::findProductInfoChanged(QString strFindName)
@@ -370,7 +371,7 @@ void MainWindow::on_pushButtonUpdate_clicked()
                 if(m_vecPickServiceInfo[j].strNo == m_vecProductInfo[i].strServiceNo)
                 {
                     QMap<QString, QVector<QunarPriceInfo> > mapTmpQunarPriceInfo;
-                    getPriceInfo4Qunaer(tmpTicketInfo, m_vecPickServiceInfo[j], mapTmpQunarPriceInfo);
+                    getPriceInfo4Qunaer(tmpTicketInfo, m_vecPickServiceInfo[j], m_vecProductInfo[i], mapTmpQunarPriceInfo);
                     for(QMap<QString, QVector<QunarPriceInfo> >::iterator iter = mapTmpQunarPriceInfo.begin();
                         iter != mapTmpQunarPriceInfo.end(); iter++)
                     {
@@ -719,10 +720,10 @@ void MainWindow::on_pushButton_ServiceUpdate_clicked()
     qDebug() << "on_pushButton_ServiceUpdate_clicked";
     PickServiceInfo tmpPickServiceInfo;
     fillPickServiceInfo(tmpPickServiceInfo);
-    if(NULL==tmpPickServiceInfo.strDeparture
+    if(/*NULL==tmpPickServiceInfo.strDeparture
       || NULL == tmpPickServiceInfo.strDestination
       || NULL == tmpPickServiceInfo.strDays
-      || NULL == tmpPickServiceInfo.strName)
+      || */NULL == tmpPickServiceInfo.strName)
     {
         QMessageBox::information(NULL, QString("提醒"), QString("请输入完整的地接服务信息!"));
         return;
@@ -787,7 +788,7 @@ void MainWindow::on_pushButton_ServiceUpdate_clicked()
                 if(m_vecTicketInfo[j].strTicketNo == m_vecProductInfo[i].strTicketNo)
                 {
                     QMap<QString, QVector<QunarPriceInfo> > mapTmpQunarPriceInfo;
-                    getPriceInfo4Qunaer(m_vecTicketInfo[j], tmpPickServiceInfo, mapTmpQunarPriceInfo);
+                    getPriceInfo4Qunaer(m_vecTicketInfo[j], tmpPickServiceInfo, m_vecProductInfo[i], mapTmpQunarPriceInfo);
                     for(QMap<QString, QVector<QunarPriceInfo> >::iterator iter = mapTmpQunarPriceInfo.begin();
                         iter != mapTmpQunarPriceInfo.end(); iter++)
                     {
@@ -1086,7 +1087,6 @@ void MainWindow::replyFinishedForLoadTicket()
         for (QJsonArray::iterator it = jsonArray.begin(); it != jsonArray.end(); ++it)
         {
             QString sTicket = (*it).toObject()["ticket_info"].toString();
-            qDebug() << "sTicket：" << sTicket << endl;
             QJsonParseError jsonParseErr;
             QJsonDocument docTicket = QJsonDocument::fromJson(sTicket.toUtf8(), &jsonParseErr);
             QJsonObject jsonObject = docTicket.object();
@@ -1751,12 +1751,12 @@ void MainWindow::channelRelationCurrentItemClicked(QTableWidgetItem *tableWidget
 
 void MainWindow::channelServiceListCurrentItemClicked(QTableWidgetItem *tableWidgetItem)
 {
-    int currentRow = ui->tableWidget_ChannelServiceList->row(tableWidgetItem);
+    /*int currentRow = ui->tableWidget_ChannelServiceList->row(tableWidgetItem);
     QString strServiceNo = ui->tableWidget_ChannelServiceList->item(currentRow, 0)->text();
     ui->lineEdit_ChannelPickServiceID->setText(strServiceNo);
     ui->lineEdit_ShopProductID->setText("");
     QString strServiceName = ui->tableWidget_ChannelServiceList->item(currentRow, 1)->text();
-    ui->lineEdit_ShopProductName->setText(strServiceName);
+    ui->lineEdit_ShopProductName->setText(strServiceName);*/
 }
 
 void MainWindow::productListCurrentItemClicked(QTableWidgetItem *tableWidgetItem)
@@ -1820,7 +1820,8 @@ void MainWindow::updateChannelRelationUI()
     }
     connect(ui->listWidget_ChannelList, SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)), this, SLOT(channelListCurrentItemChanged(QListWidgetItem *, QListWidgetItem *)));
 
-    addItemToChannelServiceList(m_vecPickServiceInfo);
+    //addItemToChannelServiceList(m_vecPickServiceInfo);
+    addItemToChannelServiceList(m_vecProductInfo);
 }
 
 void MainWindow::addItemToChannelServiceList(QVector<PickServiceInfo> &vecPickServiceInfo)
@@ -1855,6 +1856,49 @@ void MainWindow::addItemToChannelServiceList(QVector<PickServiceInfo> &vecPickSe
         QTableWidgetItem *itemPickServiceMissionNo = new QTableWidgetItem(vecPickServiceInfo[i].strMissionNo);
         itemPickServiceMissionNo->setTextAlignment(Qt::AlignHCenter);
         ui->tableWidget_ChannelServiceList->setItem(i, 2, itemPickServiceMissionNo);
+    }
+}
+
+void MainWindow::addItemToChannelServiceList(QVector<ProductInfo> &vecProductInfo)
+{
+    //渠道关联中的地接列表
+    disconnect(ui->tableWidget_ChannelServiceList, SIGNAL(itemClicked(QTableWidgetItem *)), 0, 0);
+    int row = ui->tableWidget_ChannelServiceList->rowCount();
+    for(int i=0; i<row; i++)
+    {
+        ui->tableWidget_ChannelServiceList->removeRow(0);
+    }
+
+    ui->tableWidget_ChannelServiceList->setColumnCount(5);
+    ui->tableWidget_ChannelServiceList->setRowCount(vecProductInfo.size());
+    ui->tableWidget_ChannelServiceList->verticalHeader()->setVisible(false);
+    QStringList header;
+    header << "产品信息编号" << "天数" << "团号" << "机票编号" << "地接编号";
+    ui->tableWidget_ChannelServiceList->setHorizontalHeaderLabels(header);
+    ui->tableWidget_ChannelServiceList->horizontalHeader()->resizeSections(QHeaderView::Stretch);
+
+    connect(ui->tableWidget_ChannelServiceList, SIGNAL(itemClicked(QTableWidgetItem *)), this, SLOT(channelServiceListCurrentItemClicked(QTableWidgetItem *)));
+    for(int i=0; i<vecProductInfo.size(); i++)
+    {
+        QTableWidgetItem *itemPickServiceID = new QTableWidgetItem(vecProductInfo[i].strNo);
+        itemPickServiceID->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ChannelServiceList->setItem(i, 0, itemPickServiceID);
+
+        QTableWidgetItem *itemPickServiceName = new QTableWidgetItem(vecProductInfo[i].strDays);
+        itemPickServiceName->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ChannelServiceList->setItem(i, 1, itemPickServiceName);
+
+        QTableWidgetItem *itemPickServiceMissionNo = new QTableWidgetItem(vecProductInfo[i].strMissionNo);
+        itemPickServiceMissionNo->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ChannelServiceList->setItem(i, 2, itemPickServiceMissionNo);
+
+        QTableWidgetItem *itemTicketNo = new QTableWidgetItem(vecProductInfo[i].strTicketNo);
+        itemTicketNo->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ChannelServiceList->setItem(i, 3, itemTicketNo);
+
+        QTableWidgetItem *itemPickNo = new QTableWidgetItem(vecProductInfo[i].strServiceNo);
+        itemPickNo->setTextAlignment(Qt::AlignHCenter);
+        ui->tableWidget_ChannelServiceList->setItem(i, 4, itemPickNo);
     }
 }
 
@@ -2010,7 +2054,7 @@ void MainWindow::clearChannelRelationDetailUI()
     ui->lineEdit_ShopProductName->clear();
 }
 
-void MainWindow::getPriceInfo4Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pickServiceInfo, QMap<QString, QVector<QunarPriceInfo> > &mapQunarPriceInfo)
+void MainWindow::getPriceInfo4Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pickServiceInfo, ProductInfo &productInfo, QMap<QString, QVector<QunarPriceInfo> > &mapQunarPriceInfo)
 {
     QVector<QunarPriceInfo> vecQunerPriceInfo;
     for(QMap<QString, QMap<QString, TicketPriceInfo> >::iterator iterMapTicketPriceInfo = ticketInfo.mapTicketPriceInfo.begin();
@@ -2099,7 +2143,7 @@ void MainWindow::getPriceInfo4Qunaer(TicketInfo &ticketInfo, PickServiceInfo &pi
         for(QVector<ChannelRelationInfo>::iterator iterVecChannelRelationInfo = iterMapChannelRelationInfo.value().begin();
             iterVecChannelRelationInfo != iterMapChannelRelationInfo.value().end(); iterVecChannelRelationInfo++)
         {
-            if(iterVecChannelRelationInfo->strPickServiceId.simplified() == pickServiceInfo.strNo.simplified())
+            if(iterVecChannelRelationInfo->strPickServiceId.simplified() == productInfo.strNo.simplified())
             {
                 vecTmpChannelRelationInfo.push_back(*iterVecChannelRelationInfo);
             }
@@ -2208,10 +2252,10 @@ void MainWindow::on_pushButton_ProductUpdate_clicked()
     qDebug() << "on_pushButton_ProductUpdate_clicked";
     ProductInfo tmpProductInfo;
     fillProductInfo(tmpProductInfo);
-    if(NULL==tmpProductInfo.strDeparture
+    if(/*NULL==tmpProductInfo.strDeparture
       || NULL == tmpProductInfo.strDestination
       || NULL == tmpProductInfo.strDays
-      || NULL == tmpProductInfo.strName
+      ||*/ NULL == tmpProductInfo.strName
       || NULL == tmpProductInfo.strMissionNo
       || NULL == tmpProductInfo.strServiceNo
       || NULL == tmpProductInfo.strTicketNo)
@@ -2403,12 +2447,12 @@ void MainWindow::replyFinishedForLoadProduct()
             productInfo.readFrom(jsonObject);
             m_vecProductInfo.push_back(productInfo);
         }
+
         m_iLoadPage++;
         if (jsonArray.size() >= ITEM_NUM_OF_PAGE)
         {
-            loadProduct();
+             loadProduct();
         }
-
     }
     else
     {
